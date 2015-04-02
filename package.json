@@ -1,0 +1,52 @@
+{
+  "name": "graceide",
+  "version": "0.1.1",
+  "description": "A web editor for Minigrace, with code analysis by pascuaalvi.",
+  "scripts": {
+    "lint": "node_modules/eslint/bin/eslint.js app.js public/scripts",
+    "prepublish": "node_modules/browserify/bin/cmd.js . -o public/scripts/setup.js"
+  },
+  "keywords": [
+    "grace",
+    "editor"
+  ],
+  "dependencies": {
+    "body-parser": "~1.12.0",
+    "brace": "0.5.x",
+    "cookie-parser": "~1.3.4",
+    "debug": "~2.1.1",
+    "diff": "^1.3.2",
+    "ejs": "^2.3.1",
+    "express": "^4.12.3",
+    "jade": "~1.9.2",
+    "jquery": "2.1.x",
+    "jquery-ui": "1.10.x",
+    "morgan": "~1.5.1",
+    "serve-favicon": "~2.2.0",
+    "setimmediate": "1.x",
+    "sqlite3": "*"
+  },
+  "devDependencies": {
+    "browserify": "9.x",
+    "eslint": "0.15.x"
+  },
+  "main": "public/scripts/boot.js",
+  "homepage": "https://github.com/gracelang/grace-web-editor",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/gracelang/grace-web-editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gracelang/grace-web-editor/issues",
+    "email": "git@zmthy.io"
+  },
+  "author": {
+    "name": "Timothy Jones",
+    "email": "tim@zmthy.io",
+    "url": "http://zmthy.io"
+  },
+  "license": {
+    "type": "GPL-3.0+",
+    "url": "https://www.gnu.org/licenses/gpl-3.0.html"
+  }
+}

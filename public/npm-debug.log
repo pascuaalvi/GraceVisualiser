@@ -1,0 +1,87 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/pkg/bin/node', '/usr/pkg/bin/npm', 'install' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.36
+4 warn package.json graceide@0.1.0-pre No README data
+5 verbose readDependencies using package.json deps
+6 verbose install where, deps [ '/am/st-james/home1/pascuaalvi/public_html/graceide',
+6 verbose install   [ 'body-parser',
+6 verbose install     'brace',
+6 verbose install     'cookie-parser',
+6 verbose install     'debug',
+6 verbose install     'ejs',
+6 verbose install     'express',
+6 verbose install     'jade',
+6 verbose install     'jquery',
+6 verbose install     'jquery-ui',
+6 verbose install     'morgan',
+6 verbose install     'serve-favicon',
+6 verbose install     'setimmediate',
+6 verbose install     'sqlite3',
+6 verbose install     'browserify',
+6 verbose install     'eslint' ] ]
+7 info preinstall graceide@0.1.0-pre
+8 verbose readDependencies using package.json deps
+9 verbose already installed skipping brace@0.5.x /am/st-james/home1/pascuaalvi/public_html/graceide
+10 verbose already installed skipping cookie-parser@~1.3.4 /am/st-james/home1/pascuaalvi/public_html/graceide
+11 verbose already installed skipping debug@~2.1.1 /am/st-james/home1/pascuaalvi/public_html/graceide
+12 verbose already installed skipping ejs@^2.3.1 /am/st-james/home1/pascuaalvi/public_html/graceide
+13 verbose already installed skipping express@^4.12.3 /am/st-james/home1/pascuaalvi/public_html/graceide
+14 verbose already installed skipping jade@~1.9.2 /am/st-james/home1/pascuaalvi/public_html/graceide
+15 verbose already installed skipping jquery@2.1.x /am/st-james/home1/pascuaalvi/public_html/graceide
+16 verbose already installed skipping jquery-ui@1.10.x /am/st-james/home1/pascuaalvi/public_html/graceide
+17 verbose already installed skipping morgan@~1.5.1 /am/st-james/home1/pascuaalvi/public_html/graceide
+18 verbose already installed skipping serve-favicon@~2.2.0 /am/st-james/home1/pascuaalvi/public_html/graceide
+19 verbose already installed skipping setimmediate@1.x /am/st-james/home1/pascuaalvi/public_html/graceide
+20 verbose already installed skipping sqlite3@* /am/st-james/home1/pascuaalvi/public_html/graceide
+21 verbose already installed skipping browserify@9.x /am/st-james/home1/pascuaalvi/public_html/graceide
+22 verbose already installed skipping eslint@0.15.x /am/st-james/home1/pascuaalvi/public_html/graceide
+23 verbose already installed skipping body-parser@~1.12.0 /am/st-james/home1/pascuaalvi/public_html/graceide
+24 silly resolved []
+25 info build /am/st-james/home1/pascuaalvi/public_html/graceide
+26 verbose linkStuff [ false,
+26 verbose linkStuff   false,
+26 verbose linkStuff   false,
+26 verbose linkStuff   '/am/st-james/home1/pascuaalvi/public_html' ]
+27 info linkStuff graceide@0.1.0-pre
+28 verbose linkBins graceide@0.1.0-pre
+29 verbose linkMans graceide@0.1.0-pre
+30 verbose rebuildBundles graceide@0.1.0-pre
+31 verbose rebuildBundles [ '.bin',
+31 verbose rebuildBundles   'body-parser',
+31 verbose rebuildBundles   'brace',
+31 verbose rebuildBundles   'browserify',
+31 verbose rebuildBundles   'cookie-parser',
+31 verbose rebuildBundles   'debug',
+31 verbose rebuildBundles   'ejs',
+31 verbose rebuildBundles   'eslint',
+31 verbose rebuildBundles   'express',
+31 verbose rebuildBundles   'jade',
+31 verbose rebuildBundles   'jquery',
+31 verbose rebuildBundles   'jquery-ui',
+31 verbose rebuildBundles   'morgan',
+31 verbose rebuildBundles   'serve-favicon',
+31 verbose rebuildBundles   'setimmediate',
+31 verbose rebuildBundles   'sqlite3' ]
+32 info install graceide@0.1.0-pre
+33 info postinstall graceide@0.1.0-pre
+34 info prepublish graceide@0.1.0-pre
+35 verbose unsafe-perm in lifecycle true
+36 info graceide@0.1.0-pre Failed to exec prepublish script
+37 error graceide@0.1.0-pre prepublish: `node_modules/browserify/bin/cmd.js . -o scripts/setup.js`
+37 error Exit status 8
+38 error Failed at the graceide@0.1.0-pre prepublish script.
+38 error This is most likely a problem with the graceide package,
+38 error not with npm itself.
+38 error Tell the author that this fails on your system:
+38 error     node_modules/browserify/bin/cmd.js . -o scripts/setup.js
+38 error You can get their info via:
+38 error     npm owner ls graceide
+38 error There is likely additional logging output above.
+39 error System Linux 3.17.3-1-ARCH
+40 error command "/usr/pkg/bin/node" "/usr/pkg/bin/npm" "install"
+41 error cwd /am/st-james/home1/pascuaalvi/public_html/graceide/public
+42 error node -v v0.10.36
+43 error npm -v 1.4.28
+44 error code ELIFECYCLE
+45 verbose exit [ 1, true ]

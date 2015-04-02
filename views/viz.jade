@@ -1,0 +1,9 @@
+html
+	head
+		title #{title}
+		link(rel='stylesheet', href='stylesheets/layout.css')
+	body
+		p Visualize here!
+		each file, i in files
+			li
+				p #{file}

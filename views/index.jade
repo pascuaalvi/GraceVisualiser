@@ -1,0 +1,67 @@
+doctype html
+head    
+    title #{title}
+    link(rel='stylesheet', href='stylesheets/layout.css')
+    script(src='scripts/minigrace.js')
+    script(src='scripts/setup.js')   
+  body.horizontal
+    nav#left-sidebar.vertical.no-select.fill-height
+      header.header.horizontal
+        #upload.button
+          .icon &#x21AF;                 
+          .label Upload             
+        .fill
+        #new-file.button
+          .icon &oplus;                 
+          .label New         
+      input#upload-input(type='file', multiple='')         
+      ul#file-tree.fill         
+      #version     
+    #left-sidebar-resize.no-select     
+    #grace-view.view.horizontal.fill.fill-height.hidden
+      section.open-file.vertical.fill.no-select
+        header.header.horizontal
+          .file-label File Name:                 
+          .fill
+            .file-name                     
+            input.file-name-input                 
+          .fill                 
+          a.download.button(download='new-file.grace')
+            span.icon &#x21AF;                     
+            span.label Download                 
+          .fill                 
+          .saveFile.button
+            .icon &#x270D;                     
+            .label Save                 
+          .fill                 
+          a.visualize.button(href='/code')
+            span.icon &#x26B2;                     
+            span.label Visualize                 
+          .fill                 
+          .delete.button
+            span.label Delete                     
+            span.icon &otimes;             
+        .editor.fill.fill-height         
+      section.feedback.fill.vertical
+        .compilation.no-select
+          header.header.horizontal.waiting
+            .run.button.fill
+              span.label Run                         
+              span.icon &#x25B6;                     
+            .build.fill.button
+              span.label Build                         
+              span.icon &#x2692;                     
+            .wait.fill
+              span.label Building
+              span.dots ...                     
+            .stop.button.fill
+              span.label Stop                         
+              span.icon &#x25A0;
+        pre.output.fill.               
+    #image-view.view.horizontal.fill.fill-height.hidden
+      img(src='', width='700', height='550', alt='Image file')     
+    #audio-view.view.horizontal.fill.fill-height.hidden
+      audio(controls='')
+        source(src='', type='')  
+    #minigrace-dump
+      input#debugtoggle(type='checkbox')
