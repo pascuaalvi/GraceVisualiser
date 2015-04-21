@@ -195,7 +195,7 @@ a {
   cursor: col-resize;
 }
 
-#file-tree {
+#file-tree,#file-tree-vis {
   margin: 5px;
   padding: 5px 0px;
   border-top: 1px solid #586e75;

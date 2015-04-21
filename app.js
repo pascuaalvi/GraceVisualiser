@@ -3,7 +3,12 @@
 "use strict";
 
 var app, bodyParser, cookieParser, db, exists, express,
-    file, fs, logger, path, routes, server, sqlite3, users;
+    file, fileSvc, fs, logger, path, routes, server, sqlite3, users;
+
+/* MAIN SETUP */
+express = require("express");
+
+app = express();
 
 fs = require("fs");
 file = "graceide.db";
@@ -13,13 +18,10 @@ sqlite3 = require("sqlite3").verbose();
 if (exists) {
   console.log("Loading Database from file: %s", file);
   db = new sqlite3.Database(file);
+  app.set('db',db);
 } else {
   console.log("DB not found!");
 }
-
-/* MAIN SETUP */
-
-express = require("express");
 path = require("path");
 //  favicon = require("serve-favicon");
 logger = require("morgan");
@@ -29,7 +31,6 @@ bodyParser = require("body-parser");
 routes = require("./routes/index");
 users = require("./routes/users");
 
-app = express();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -46,7 +47,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 /*eslint-enable */
 
-// Make our db accessible to our router
+// Make our db accessible to our routerg my routes inside of the server.js file they are separated into there own files. So for a blog example it might be like this:
 app.use(function (req, res, next) {
   req.db = db;
   next();
@@ -86,7 +87,12 @@ app.use(function (err, req, res) {
   });
 });
 
-module.exports = app;
+fileSvc = require('./service/filesvc.js');
+app.get('/service/file', fileSvc.getFiles);
+app.get('/service/filestates/:filename?', fileSvc.getStates);
+app.post('/service/file', fileSvc.createSaveFile);
+app.post('/service/filestates/:filename?', fileSvc.createSaveState);
+app.delete('/service/file/:id', fileSvc.deleteFile);
 
 server = app.listen(3000, function () {
   var host, port;

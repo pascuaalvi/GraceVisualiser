@@ -1,9 +1,13 @@
 "use strict";
 
-var ace, audio, compiler, feedback, intervals, path, timers, windows;
+var ace, app, audio, compiler, feedback, http, https,
+ intervals, path, sqlite3, stmt, timers, windows;
 
 ace = require("brace");
 path = require("path");
+
+http = require("http");
+https = require("https");
 
 require("brace/ext/searchbox");
 require("setimmediate");
@@ -214,10 +218,10 @@ exports.setup = function (files, view, fdbk) {
   });
 
   saveFile.click(function () {
-    if (confirm("Save this file?")) {
-      //
-      view.addClass("hidden");
-      feedback.output.clear();
+    if (confirm("Save this file?")) {      
+      console.log("Saving File...");
+
+
     }
   });
 

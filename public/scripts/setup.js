@@ -44652,7 +44652,8 @@ $(function () {
 (function (global){
 "use strict";
 
-var ace, audio, compiler, feedback, intervals, path, timers, windows;
+var ace, app, audio, compiler, feedback,
+ intervals, path, sqlite3, stmt, timers, windows;
 
 ace = require("brace");
 path = require("path");
@@ -44866,10 +44867,16 @@ exports.setup = function (files, view, fdbk) {
   });
 
   saveFile.click(function () {
-    if (confirm("Save this file?")) {
-      //
-      view.addClass("hidden");
-      feedback.output.clear();
+    if (confirm("Save this file?")) {      
+      console.log(app);
+      console.log("DBG-FILENAME: " + fileName.text());
+      console.log("DBG-CONTENTS: " + editor.getSession().getValue());
+      stmt = app.get('db').prepare("INSERT INTO files VALUES ("
+        + fileName.val()
+        + ","
+        + editor.getSession()
+        + ")");
+      stmt.run();
     }
   });
 

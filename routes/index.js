@@ -10,17 +10,21 @@ router.get('/', function(req, res, next) {
 
 router.get('/code', function(req, res, next) {
 	var db = req.db;
-	var files = [];
+	var fileArray = [];
 	db.serialize(function() {
-		var count = 0
 	    db.each('SELECT rowid AS id, info FROM lorem', function(err, row) {
-	    	files[count] = ({id: row.id, info: row.info});
+	    	//fileArray[count] = ({id: row.id, info: row.info});
+	    	fileArray.push({ id:row.id,info:row.info });
 	      console.log(row.id + ': ' + row.info);
-	      count++;
 	    });
-	  console.log("Rendering...");  
+		console.log("Rendering...");  
+		console.log(fileArray);
+		
+		setTimeout(function(){
+			res.render('viz', { title: 'Grace Visualize', files:fileArray});	 
+		}, 1000);
+		 
 	});
-	res.render('viz', { title: 'Grace Visualize', files:files });
 });
 
 module.exports = router;

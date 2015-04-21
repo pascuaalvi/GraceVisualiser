@@ -1,9 +1,48 @@
-html
-	head
-		title #{title}
-		link(rel='stylesheet', href='stylesheets/layout.css')
-	body
-		p Visualize here!
-		each file, i in files
-			li
-				p #{file}
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    title Grace Editor
+    link(rel='stylesheet', href='stylesheets/layout.css')
+    script(src='scripts/minigrace.js')
+    script(src='scripts/setup.js')
+  body.horizontal
+    nav#left-sidebar.vertical.no-select.fill-height
+      header.header.horizontal
+        p Grace Visualizer
+      header.header.horizontal
+        a.button(href='/',style='color: #b58900;')
+          .icon ←
+          .label Back To Editor
+        .fill
+      input#upload-input(type='file', multiple='')
+      ul#file-tree-vis.fill
+      #version
+    #left-sidebar-resize.no-select
+    #grace-view.view.horizontal.fill.fill-height
+      section.open-file.vertical.fill.no-select
+        header.header.horizontal
+          p Current View
+        .editor.fill.fill-width
+          for file in files
+            li "#{file.id}" with Content: "#{file.info}"
+          else
+            li No files detected.
+        header.header.horizontal
+          .fill
+            .file-name
+            input.file-name-input
+          .button
+            span.icon ⇦
+            span.label Back
+          .fill
+            .file-name
+            input.file-name-input
+          .button
+            span.label Forward
+            span.icon ⇨
+          .fill
+            .file-name
+            input.file-name-input
+        header.header.horizontal
+          p Next View
+        .editor.fill.fill-width
