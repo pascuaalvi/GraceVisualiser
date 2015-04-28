@@ -27,4 +27,35 @@ router.get('/code', function(req, res, next) {
 	});
 });
 
+router.get("/service/file",
+  function (req, res) {
+    console.log("GETTING FILES!");
+    res.send("Hello world!");
+  }
+);
+
+router.get("/service/filestate",
+  function (req, res) {
+
+  }
+);
+
+router.post("/service/file/new/:filename?",
+  function (req, res) {
+
+  }
+);
+
+router.post("/service/filestate/new/:filename?",
+  function (req, res) {
+
+  }
+);
+
+router["delete"]("/service/file/new/:id",
+  function (req, res) {
+
+  }
+);
+
 module.exports = router;

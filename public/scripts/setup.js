@@ -44652,8 +44652,8 @@ $(function () {
 (function (global){
 "use strict";
 
-var ace, app, audio, compiler, feedback,
- intervals, path, sqlite3, stmt, timers, windows;
+var ace, audio, compiler, feedback, HttpClient,
+intervals, path, timers, windows;
 
 ace = require("brace");
 path = require("path");
@@ -44671,8 +44671,32 @@ timers = [];
 intervals = [];
 audio = [];
 
+HttpClient = function () {
+  this.get = function (aUrl, aCallback) {
+    var anHttpRequest = new XMLHttpRequest();
+    anHttpRequest.onreadystatechange = function () { 
+      if (anHttpRequest.readyState === 4 && anHttpRequest.status === 200){
+        aCallback(anHttpRequest.responseText);
+      }
+    }
+    anHttpRequest.open( "GET", aUrl, true );            
+    anHttpRequest.send( null );
+  }
+  this.post = function (aUrl, aCallback) {
+    var anHttpRequest = new XMLHttpRequest();
+    anHttpRequest.onreadystatechange = function () { 
+      if (anHttpRequest.readyState === 4 && anHttpRequest.status === 200){
+        aCallback(anHttpRequest.responseText);
+      }
+    }
+    anHttpRequest.open( "POST", aUrl, true );            
+    anHttpRequest.send( null );
+  }
+}
+
 exports.setup = function (files, view, fdbk) {
-  var download, drop, editor, fileName, opening, rename, saveFile, session;
+  var download, drop, editor, fileName,
+  opening, rename, saveFile, session;
 
   function stop() {
     windows.forEach(function (win) {
@@ -44695,8 +44719,10 @@ exports.setup = function (files, view, fdbk) {
   }
 
   function checkStop() {
-    if (windows.length === 0 &&
-        timers.length === 0 && intervals.length === 0 && audio.length === 0) {
+    if (windows.length === 0
+      && timers.length === 0
+      && intervals.length === 0
+      && audio.length === 0) {
       stop();
       return true;
     }
@@ -44868,15 +44894,12 @@ exports.setup = function (files, view, fdbk) {
 
   saveFile.click(function () {
     if (confirm("Save this file?")) {      
-      console.log(app);
-      console.log("DBG-FILENAME: " + fileName.text());
-      console.log("DBG-CONTENTS: " + editor.getSession().getValue());
-      stmt = app.get('db').prepare("INSERT INTO files VALUES ("
-        + fileName.val()
-        + ","
-        + editor.getSession()
-        + ")");
-      stmt.run();
+      console.log("Saving File...");
+      var aClient = new HttpClient();
+      aClient.get("/service/file", function (response) {
+        alert("File Saved");
+        console.log("RESPONDED W/:" + response);
+      });
     }
   });
 

@@ -1,13 +1,10 @@
 "use strict";
 
-var ace, app, audio, compiler, feedback, http, https,
- intervals, path, sqlite3, stmt, timers, windows;
+var ace, audio, compiler, feedback, HttpClient,
+intervals, path, timers, windows;
 
 ace = require("brace");
 path = require("path");
-
-http = require("http");
-https = require("https");
 
 require("brace/ext/searchbox");
 require("setimmediate");
@@ -22,8 +19,32 @@ timers = [];
 intervals = [];
 audio = [];
 
+HttpClient = function () {
+  this.get = function (aUrl, aCallback) {
+    var anHttpRequest = new XMLHttpRequest();
+    anHttpRequest.onreadystatechange = function () { 
+      if (anHttpRequest.readyState === 4 && anHttpRequest.status === 200){
+        aCallback(anHttpRequest.responseText);
+      }
+    }
+    anHttpRequest.open( "GET", aUrl, true );            
+    anHttpRequest.send( null );
+  }
+  this.post = function (aUrl, aCallback) {
+    var anHttpRequest = new XMLHttpRequest();
+    anHttpRequest.onreadystatechange = function () { 
+      if (anHttpRequest.readyState === 4 && anHttpRequest.status === 200){
+        aCallback(anHttpRequest.responseText);
+      }
+    }
+    anHttpRequest.open( "POST", aUrl, true );            
+    anHttpRequest.send( null );
+  }
+}
+
 exports.setup = function (files, view, fdbk) {
-  var download, drop, editor, fileName, opening, rename, saveFile, session;
+  var download, drop, editor, fileName,
+  opening, rename, saveFile, session;
 
   function stop() {
     windows.forEach(function (win) {
@@ -46,8 +67,10 @@ exports.setup = function (files, view, fdbk) {
   }
 
   function checkStop() {
-    if (windows.length === 0 &&
-        timers.length === 0 && intervals.length === 0 && audio.length === 0) {
+    if (windows.length === 0
+      && timers.length === 0
+      && intervals.length === 0
+      && audio.length === 0) {
       stop();
       return true;
     }
@@ -220,8 +243,11 @@ exports.setup = function (files, view, fdbk) {
   saveFile.click(function () {
     if (confirm("Save this file?")) {      
       console.log("Saving File...");
-
-
+      var aClient = new HttpClient();
+      aClient.get("/service/file", function (response) {
+        alert("File Saved");
+        console.log("RESPONDED W/:" + response);
+      });
     }
   });
 

@@ -3,7 +3,7 @@
 "use strict";
 
 var app, bodyParser, cookieParser, db, exists, express,
-    file, fileSvc, fs, logger, path, routes, server, sqlite3, users;
+    file, fs, logger, path, routes, server, sqlite3, users;
 
 /* MAIN SETUP */
 express = require("express");
@@ -18,7 +18,7 @@ sqlite3 = require("sqlite3").verbose();
 if (exists) {
   console.log("Loading Database from file: %s", file);
   db = new sqlite3.Database(file);
-  app.set('db',db);
+  app.set("db", db);
 } else {
   console.log("DB not found!");
 }
@@ -47,7 +47,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 /*eslint-enable */
 
-// Make our db accessible to our routerg my routes inside of the server.js file they are separated into there own files. So for a blog example it might be like this:
+// Make our db accessible to our routerg my routes
+// inside of the server.js file they are separated.
 app.use(function (req, res, next) {
   req.db = db;
   next();
@@ -86,13 +87,6 @@ app.use(function (err, req, res) {
     "error": {}
   });
 });
-
-fileSvc = require('./service/filesvc.js');
-app.get('/service/file', fileSvc.getFiles);
-app.get('/service/filestates/:filename?', fileSvc.getStates);
-app.post('/service/file', fileSvc.createSaveFile);
-app.post('/service/filestates/:filename?', fileSvc.createSaveState);
-app.delete('/service/file/:id', fileSvc.deleteFile);
 
 server = app.listen(3000, function () {
   var host, port;
