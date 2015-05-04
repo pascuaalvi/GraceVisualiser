@@ -44682,15 +44682,20 @@ HttpClient = function () {
     anHttpRequest.open( "GET", aUrl, true );            
     anHttpRequest.send( null );
   }
-  this.post = function (aUrl, aCallback) {
-    var anHttpRequest = new XMLHttpRequest();
-    anHttpRequest.onreadystatechange = function () { 
-      if (anHttpRequest.readyState === 4 && anHttpRequest.status === 200){
-        aCallback(anHttpRequest.responseText);
+  this.post = function (aUrl, params, aCallback) {
+    var http = new XMLHttpRequest();
+    var url = aUrl;
+    var params = params;
+    http.open("POST", url, true);
+
+    //Send the proper header information along with the request
+    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    http.onreadystatechange = function() {//Call a function when the state changes.
+      if(http.readyState == 4 && http.status == 200) {
+          alert(http.responseText);
       }
     }
-    anHttpRequest.open( "POST", aUrl, true );            
-    anHttpRequest.send( null );
+    http.send(params);
   }
 }
 
@@ -44896,9 +44901,15 @@ exports.setup = function (files, view, fdbk) {
     if (confirm("Save this file?")) {      
       console.log("Saving File...");
       var aClient = new HttpClient();
-      aClient.get("/service/file", function (response) {
-        alert("File Saved");
-        console.log("RESPONDED W/:" + response);
+      var params = "fileName="+fileName.text()+"&fileContent="+window.btoa(editor.getSession())+"";
+      console.log(params);
+      aClient.post("/service/file/save", params, function (response) {
+        if(response === "Success"){
+          console.log("File Saved");
+        }
+        else{
+          console.log("Failure:" +response);
+        }
       });
     }
   });

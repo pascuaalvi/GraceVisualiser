@@ -47,10 +47,30 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 /*eslint-enable */
 
-// Make our db accessible to our routerg my routes
-// inside of the server.js file they are separated.
+// Make our db accessible to our router.
 app.use(function (req, res, next) {
   req.db = db;
+  next();
+});
+
+// Make our guid generator available to the router
+app.use(function (req, res, next) {
+  req.guid = function () {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x100000)
+        .toString();
+    }
+    return s4();
+  };
+  next();
+});
+
+// Make our guid generator available to the router
+app.use(function (req, res, next) {
+  req.timestamp = function () {
+    var datum = new Date();
+    return datum.getTime()/1000;
+  };
   next();
 });
 
