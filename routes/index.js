@@ -13,10 +13,10 @@ router.get('/code', function (req, res, next) {
 	var db = req.db;
 	var fileArray = [];
 	db.serialize(function() {
-    db.each('SELECT rowid AS id, info FROM lorem', function(err, row) {
+    db.each('SELECT fileID AS id, filecontent FROM filestates', function(err, row) {
     	//fileArray[count] = ({id: row.id, info: row.info});
-    	fileArray.push({ id:row.id,info:row.info });
-      console.log(row.id + ': ' + row.info);
+    	fileArray.push({ id:row.id,content:row.filecontent });
+      console.log(row.id + ': ' + row.filecontent);
     });
 		console.log("Rendering...");  
 		console.log(fileArray);

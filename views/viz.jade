@@ -3,8 +3,7 @@ html(lang='en')
     meta(charset='utf-8')
     title Grace Editor
     link(rel='stylesheet', href='stylesheets/layout.css')
-    script(src='scripts/minigrace.js')
-    script(src='scripts/setup.js')
+    script(src='scripts/visual.js')
   body.horizontal
     nav#left-sidebar.vertical.no-select.fill-height
       header.header.horizontal
@@ -16,6 +15,12 @@ html(lang='en')
         .fill
       input#upload-input(type='file', multiple='')
       ul#file-tree-vis.fill
+        for file in files
+          li.filestate.grace.ui-draggable(data-name="#{file.id}")
+            .file-name #{file.id}
+            input(value="#{file.content}" type="hidden" id="#{file.id}" style="display:none;") 
+        else
+          li No files detected.
       #version
     #left-sidebar-resize.no-select
     #grace-view.view.horizontal.fill.fill-height
@@ -23,21 +28,17 @@ html(lang='en')
         header.header.horizontal
           p Current View
         .editor.fill.fill-width
-          for file in files
-            li "#{file.id}" with Content: "#{file.info}"
-          else
-            li No files detected.
         header.header.horizontal
           .fill
             .file-name
             input.file-name-input
-          .button
+          .back.button
             span.icon ⇦
             span.label Back
           .fill
             .file-name
             input.file-name-input
-          .button
+          .forward.button
             span.label Forward
             span.icon ⇨
           .fill

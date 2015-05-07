@@ -44897,21 +44897,13 @@ exports.setup = function (files, view, fdbk) {
     }
   });
 
-  saveFile.click(function () {
-    if (confirm("Save this file?")) {      
+  saveFile.click(function () {    
       console.log("Saving File...");
       var aClient = new HttpClient();
-      var params = "fileName="+fileName.text()+"&fileContent="+window.btoa(editor.getSession())+"";
+      var params = "fileName="+fileName.text()+"&fileContent="+editor.getSession()+"";
       console.log(params);
       aClient.post("/service/file/save", params, function (response) {
-        if(response === "Success"){
-          console.log("File Saved");
-        }
-        else{
-          console.log("Failure:" +response);
-        }
       });
-    }
   });
 
   function resize() {

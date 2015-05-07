@@ -4,7 +4,7 @@
   "description": "A web editor for Minigrace, with code analysis by pascuaalvi.",
   "scripts": {
     "lint": "node_modules/eslint/bin/eslint.js app.js public/scripts",
-    "prepublish": "node_modules/browserify/bin/cmd.js . -o public/scripts/setup.js"
+    "prepublish": "sh initialize.sh"
   },
   "keywords": [
     "grace",
@@ -23,6 +23,7 @@
     "jquery": "2.1.x",
     "jquery-ui": "1.10.x",
     "morgan": "~1.5.1",
+    "require": "^2.4.17",
     "serve-favicon": "~2.2.0",
     "setimmediate": "1.x",
     "sqlite3": "*"
@@ -35,7 +36,7 @@
   "homepage": "https://github.com/gracelang/grace-web-editor",
   "repository": {
     "type": "git",
-    "url": "git://github.com/gracelang/grace-web-editor.git"
+    "url": "git://github.com/pascuaalvi/GraceVisualiser"
   },
   "bugs": {
     "url": "https://github.com/gracelang/grace-web-editor/issues",

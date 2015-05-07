@@ -232,18 +232,18 @@ a {
   font-weight: bold;
 }
 
-#file-tree .file {
+#file-tree .file .filestate {
   font-weight: normal;
 }
 
-.file, .directory {
+.file, .filestate, .directory {
   position: relative;
   padding: 0px 8px;
   margin: 5px 0px;
   cursor: pointer;
 }
 
-.file .file-name, .directory .directory-name {
+.file, .filestate, .file-name, .directory .directory-name {
   overflow-x: hidden;
 }
 
