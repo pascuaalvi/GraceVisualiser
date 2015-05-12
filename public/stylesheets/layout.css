@@ -173,6 +173,13 @@ a {
   padding: 9px 0px 10px;
 }
 
+#left-sidebar-states {
+  position: relative;
+  min-width: 60px;
+  width: 350px;
+  padding: 9px 0px 10px;
+}
+
 #left-sidebar .button {
   overflow: hidden;
   height: 27px;

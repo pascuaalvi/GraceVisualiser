@@ -11,22 +11,27 @@ router.get('/', function (req, res, next) {
 
 router.get('/code', function (req, res, next) {
   // Filename of file to get states of
-  var filename = req.body.fileName;
-  console.log(filename);
+  var fileName = req.body.fileName;
+  console.log(fileName);
 	var db = req.db;
 	var fileArray = [];
 	db.serialize(function() {
-    db.each('SELECT fileID AS id, filecontent FROM filestates', function(err, row) {
+    db.each('SELECT fileID AS id, created, filecontent '
+      +'FROM filestates '
+      +'WHERE fileID = '
+      +'(SELECT fileID FROM files WHERE fileName="'+fileName+'")', 
+      function(err, row) {
     	//fileArray[count] = ({id: row.id, info: row.info});
-    	fileArray.push({ id:row.id,content:row.filecontent });
-      console.log(row.id + ': ' + row.filecontent);
+      var d = new Date(row.created).toString();
+    	fileArray.push({ id:row.id, created:d, content:row.filecontent });
+      console.log(row.id + ': ' + row.filecontent + "CREATED: "+d);
     });
 		console.log("Rendering...");  
 		console.log(fileArray);
 		
 		setTimeout(function(){
 			res.render('viz', { title: 'Grace Visualize', files:fileArray});	 
-		}, 1000);
+		}, 10);
 		 
 	});
 });

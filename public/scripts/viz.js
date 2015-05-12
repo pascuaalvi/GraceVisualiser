@@ -14,7 +14,11 @@ $(function () {
   view = $("#grace-view");
 
   editorCurrent = ace.edit(view.find(".editor-current")[0]);
-  editorNext =  ace.edit(view.find(".editor-next")[0]); 
+  editorNext =  ace.edit(view.find(".editor-next")[0]);
+
+  editorCurrent.setReadOnly(true);
+  editorNext.setReadOnly(true);
+
 
   filestates = view.find(".filestate");
 
@@ -22,11 +26,13 @@ $(function () {
   forward = view.find(".forward");
 
   back.click(function () {
-  console.log("Back");
+    console.log("Back");
   });
 
   forward.click(function () {
-  console.log("Forward");
+    console.log("Forward");
   });
-  
+
+
+
 });

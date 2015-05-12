@@ -5,7 +5,7 @@ html(lang='en')
     link(rel='stylesheet', href='stylesheets/layout.css')
     script(src='scripts/visual.js')
   body.horizontal
-    nav#left-sidebar.vertical.no-select.fill-height
+    nav#left-sidebar-states.vertical.no-select.fill-height
       header.header.horizontal
         p Grace Visualizer
       header.header.horizontal
@@ -17,7 +17,7 @@ html(lang='en')
       ul#file-tree-vis.fill
         for file in files
           li.filestate.grace.ui-draggable(data-name="#{file.id}")
-            .file-name #{file.id}
+            .file-name #{file.created}
             input(value="#{file.content}" type="hidden" id="#{file.id}" style="display:none;") 
         else
           li No files detected.
@@ -27,7 +27,7 @@ html(lang='en')
       section.open-file.vertical.fill.no-select
         header.header.horizontal
           p Current View
-        #currentstate.editor-current.fill.fill-width
+        .editor-current.fill.fill-width
         header.header.horizontal
           .fill
             .file-name
@@ -44,6 +44,23 @@ html(lang='en')
           .fill
             .file-name
             input.file-name-input
+      section.open-file.vertical.fill.no-select      
         header.header.horizontal
           p Next View
-        #nextstate.editor-next.fill.fill-width
+        .editor-next.fill.fill-width
+        header.header.horizontal
+          .fill
+            .file-name
+            input.file-name-input
+          .back.button
+            span.icon ⇦
+            span.label Back
+          .fill
+            .file-name
+            input.file-name-input
+          .forward.button
+            span.label Forward
+            span.icon ⇨
+          .fill
+            .file-name
+            input.file-name-input
