@@ -49,7 +49,7 @@ HttpClient = function () {
 
 exports.setup = function (files, view, fdbk) {
   var download, drop, editor, fileName,
-  opening, rename, saveFile, session;
+  opening, rename, saveFile, session, visualize;
 
   function stop() {
     windows.forEach(function (win) {
@@ -109,6 +109,7 @@ exports.setup = function (files, view, fdbk) {
   fileName = view.find(".file-name");
   drop = view.find(".delete");
   saveFile = view.find(".saveFile");
+  visualize = view.find(".visualize");
 
   rename = view.find(".file-name-input");
 
@@ -245,11 +246,18 @@ exports.setup = function (files, view, fdbk) {
     }
   });
 
+  visualize.click(function (){
+    console.log("Visualizing Code States...");
+      var aClient = new HttpClient();
+      var params = "fileName="+fileName.text();
+      aClient.get("/code", params, function (response) {
+      });
+  });
+
   saveFile.click(function () {    
       console.log("Saving File...");
       var aClient = new HttpClient();
       var params = "fileName="+fileName.text()+"&fileContent="+editor.getSession()+"";
-      console.log(params);
       aClient.post("/service/file/save", params, function (response) {
       });
   });

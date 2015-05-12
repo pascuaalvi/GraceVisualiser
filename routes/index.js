@@ -10,6 +10,9 @@ router.get('/', function (req, res, next) {
 });
 
 router.get('/code', function (req, res, next) {
+  // Filename of file to get states of
+  var filename = req.body.fileName;
+  console.log(filename);
 	var db = req.db;
 	var fileArray = [];
 	db.serialize(function() {

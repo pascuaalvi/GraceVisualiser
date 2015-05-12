@@ -360,7 +360,7 @@ a {
   color: #dc322f;
 }
 
-.editor, .output {
+.editor,.editor-next,.editor-current, .output {
   font-size: 10pt;
   border: 1px solid #586e75;
   margin: 0px 5px;
