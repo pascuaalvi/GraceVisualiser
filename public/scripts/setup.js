@@ -44652,9 +44652,10 @@ $(function () {
 (function (global){
 "use strict";
 
-var ace, audio, compiler, feedback, HttpClient,
+var $, ace, audio, compiler, feedback, HttpClient,
 intervals, path, timers, windows;
 
+$ = require("jquery");
 ace = require("brace");
 path = require("path");
 
@@ -44684,10 +44685,7 @@ HttpClient = function () {
   }
   this.post = function (aUrl, params, aCallback) {
     var http = new XMLHttpRequest();
-    var url = aUrl;
-    var params = params;
-    http.open("POST", url, true);
-
+    http.open("POST", aUrl, true);
     //Send the proper header information along with the request
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {//Call a function when the state changes.
@@ -44766,6 +44764,7 @@ exports.setup = function (files, view, fdbk) {
   rename = view.find(".file-name-input");
 
   function setDownload(name, text) {
+    visualize.attr("href", "/code?fileName="+fileName.text());
     download.attr("href", URL.createObjectURL(new Blob([ text ], {
       "type": "text/x-grace"
     }))).attr("download", name);
@@ -44898,14 +44897,6 @@ exports.setup = function (files, view, fdbk) {
     }
   });
 
-  visualize.click(function (){
-    console.log("Visualizing Code States...");
-      var aClient = new HttpClient();
-      var params = "fileName="+fileName.text();
-      aClient.get("/code", params, function (response) {
-      });
-  });
-
   saveFile.click(function () {    
       console.log("Saving File...");
       var aClient = new HttpClient();
@@ -44946,7 +44937,7 @@ exports.setup = function (files, view, fdbk) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./ace/mode-grace":9,"./compiler":10,"./feedback":12,"brace":2,"brace/ext/searchbox":1,"path":4,"setimmediate":8}],12:[function(require,module,exports){
+},{"./ace/mode-grace":9,"./compiler":10,"./feedback":12,"brace":2,"brace/ext/searchbox":1,"jquery":7,"path":4,"setimmediate":8}],12:[function(require,module,exports){
 // Sets up the various parts of the feedback system.
 
 "use strict";

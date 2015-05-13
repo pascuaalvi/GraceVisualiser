@@ -5,32 +5,41 @@ var router = express.Router();
 console.log("Loading Index");
 
 // Routes
-router.get('/', function (req, res, next) {
+router.get('/', function (req, res) {
   res.render('index', { title: 'Grace Editor' });
 });
 
-router.get('/code', function (req, res, next) {
+router.get('/code', function (req, res) {
   // Filename of file to get states of
-  var fileName = req.body.fileName;
+  var fileName = req.query.fileName;
   console.log(fileName);
 	var db = req.db;
 	var fileArray = [];
-	db.serialize(function() {
-    db.each('SELECT fileID AS id, created, filecontent '
+  var query = "";
+
+  if(fileName){
+    query = 'SELECT fileID AS id, created, filecontent '
       +'FROM filestates '
       +'WHERE fileID = '
-      +'(SELECT fileID FROM files WHERE fileName="'+fileName+'")', 
-      function(err, row) {
+      +'(SELECT fileID FROM files WHERE fileName="'+fileName+'")';
+  }
+  else{
+    query = 'SELECT fileID AS id, created, filecontent '
+      +'FROM filestates ';
+  }
+  console.log("QUERY: "+query)
+
+	db.serialize(function() {
+    db.each(query, function(err, row) {
     	//fileArray[count] = ({id: row.id, info: row.info});
-      var d = new Date(row.created).toString();
+      var d = new Date(row.created*1000).toString();
     	fileArray.push({ id:row.id, created:d, content:row.filecontent });
       console.log(row.id + ': ' + row.filecontent + "CREATED: "+d);
     });
 		console.log("Rendering...");  
 		console.log(fileArray);
-		
 		setTimeout(function(){
-			res.render('viz', { title: 'Grace Visualize', files:fileArray});	 
+			res.render('viz', { title: 'Grace Visualize', files:fileArray});
 		}, 10);
 		 
 	});
