@@ -81,8 +81,7 @@ router.post('/service/file/save',
         + "WHERE fileName='" + filename+"'";
 
       var search = "SELECT fileID FROM files "
-        + "where fileName='" + filename+"'";
-
+        + "WHERE fileName='" + filename+"'";
 
       // Check if filename exists in DB already (table: files)
       db.each(counter, function(err, row) {
@@ -92,7 +91,7 @@ router.post('/service/file/save',
         }
       });
       setTimeout(function(){
-      // If so, then use the fileID from that
+        // If so, then use the fileID from that
         if(!isNewFile){
           db.each(search, function(err, row) {
             fileID = row.fileID;
@@ -100,31 +99,47 @@ router.post('/service/file/save',
           });
         }
         setTimeout(function(){
-          // Do writes to database
-          db.serialize(function() {      
-            if(isNewState){
-              if(isNewFile){
-                var filenames = db.run(
-                  "INSERT INTO files (fileID, filename) VALUES ("
-                    +fileID+",'"+filename+"')");
+          // If it isn't a new file, then check if content is different.
+          if(!isNewFile){
+            var compare = "SELECT filecontent FROM filestates "
+            + "WHERE fileID = "+fileID+" "
+            + "ORDER BY created DESC LIMIT 1"
+            db.each(compare, function(err, row) {
+              if(filecontent === row.filecontent){
+                isNewState = false;
+                console.log("GESUNDHEIT!");
+              } 
+            });
+          }
+          setTimeout(function(){
+            // Do writes to database
+            db.serialize(function() {      
+              if(isNewState){
+                if(isNewFile){
+                  var filenames = db.run(
+                    "INSERT INTO files (fileID, filename) VALUES ("
+                      +fileID+",'"+filename+"')");
+                }
+                var filestates = db.run(
+                  "INSERT INTO filestates (uID, fileID, created, filecontent) VALUES ("
+                    +guid+","+fileID+","+created+",'"+filecontent+"')");            
               }
-              var filestates = db.run(
-                "INSERT INTO filestates (uID, fileID, created, filecontent) VALUES ("
-                  +guid+","+fileID+","+created+",'"+filecontent+"')");            
-            }
-          });
-        }, 10);
-      }, 10);
+            });
+
+            setTimeout(function() {
+              if(isNewState){
+                // res.send("File Saved");
+                res.send("ID: "+guid+" TIME: "+created+" NAME: " + filename + " CONTENT: "+filecontent);
+              }
+              else {
+                res.send("You haven't made any changes!");
+              }
+            }, 1);
+          }, 1);
+        }, 1);
+      }, 1);
     });
-    if(isNewState){
-      // res.send("File Saved");
-      res.send("ID: "+guid+" TIME: "+created+" NAME: " + filename + " CONTENT: "+filecontent);
-    }
-    else{
-      res.send("You haven't made any changes!");
-    }
-  }
-);
+});
 
 router["delete"]("/service/file/new/:id",
   function (req, res) {
