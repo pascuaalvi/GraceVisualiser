@@ -71,20 +71,58 @@ router.post('/service/file/save',
   	var created = req.timestamp();
   	// Get db from app.js
   	var db = req.db;
-  	// Do writes to database
-  	db.serialize(function() {
-  		// Check if filename exists in DB already (table: files)
-  		// If so, then use the uid from that
-	    var filenames = db.run(
-	    	"INSERT INTO files (fileID, filename) VALUES ("
-	    		+fileID+",'"+filename+"')");
-  		var filestates = db.run(
-  			"INSERT INTO filestates (uID, fileID, created, filecontent) VALUES ("
-  				+guid+","+fileID+","+created+",'"+filecontent+"')");	 
-		});
+    // Variables for checks
+    var isNewFile = true;
+    var isNewState = true;
 
-  	res.send("ID: "+guid+" TIME: "+created+" NAME: " + filename + " CONTENT: "+filecontent);
-  	// res.send("Success");
+    // Check if file exists already
+    db.serialize(function() {
+      var counter = "SELECT count(*) as numRows FROM files "
+        + "WHERE fileName='" + filename+"'";
+
+      var search = "SELECT fileID FROM files "
+        + "where fileName='" + filename+"'";
+
+
+      // Check if filename exists in DB already (table: files)
+      db.each(counter, function(err, row) {
+        if(row.numRows > 0){
+          isNewFile = false;
+          console.log("File found in DB.");
+        }
+      });
+      setTimeout(function(){
+      // If so, then use the fileID from that
+        if(!isNewFile){
+          db.each(search, function(err, row) {
+            fileID = row.fileID;
+            console.log("Update on file. Using ID: "+fileID);
+          });
+        }
+        setTimeout(function(){
+          // Do writes to database
+          db.serialize(function() {      
+            if(isNewState){
+              if(isNewFile){
+                var filenames = db.run(
+                  "INSERT INTO files (fileID, filename) VALUES ("
+                    +fileID+",'"+filename+"')");
+              }
+              var filestates = db.run(
+                "INSERT INTO filestates (uID, fileID, created, filecontent) VALUES ("
+                  +guid+","+fileID+","+created+",'"+filecontent+"')");            
+            }
+          });
+        }, 10);
+      }, 10);
+    });
+    if(isNewState){
+      // res.send("File Saved");
+      res.send("ID: "+guid+" TIME: "+created+" NAME: " + filename + " CONTENT: "+filecontent);
+    }
+    else{
+      res.send("You haven't made any changes!");
+    }
   }
 );
 
