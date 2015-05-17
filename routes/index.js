@@ -18,23 +18,25 @@ router.get('/code', function (req, res) {
   var query = "";
 
   if(fileName){
-    query = 'SELECT fileID AS id, created, filecontent '
+    query = 'SELECT uID AS id, created, filecontent '
       +'FROM filestates '
       +'WHERE fileID = '
       +'(SELECT fileID FROM files WHERE fileName="'+fileName+'")';
   }
   else{
-    query = 'SELECT fileID AS id, created, filecontent '
+    query = 'SELECT uID AS id, created, filecontent '
       +'FROM filestates ';
   }
   console.log("QUERY: "+query)
 
 	db.serialize(function() {
+    var before = null;
     db.each(query, function(err, row) {
     	//fileArray[count] = ({id: row.id, info: row.info});
       var d = new Date(row.created*1000).toString();
-    	fileArray.push({ id:row.id, created:d, content:row.filecontent });
-      console.log(row.id + ': ' + row.filecontent + "CREATED: "+d);
+    	fileArray.push({ id:row.id, created:d, content:row.filecontent, previous: before});
+      console.log(row.id + ': ' + row.filecontent + " CREATED: "+d+" BEFORE: "+before);
+      before = row.id;
     });
 		console.log("Rendering...");  
 		console.log(fileArray);

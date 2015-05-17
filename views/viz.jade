@@ -17,8 +17,7 @@ html(lang='en')
       ul#file-tree-vis.fill
         for file in files
           li.filestate.grace.ui-draggable(data-name="#{file.id}")
-            .file-name #{file.created}
-            input(value="#{file.content}" type="hidden" id="#{file.id}" style="display:none;") 
+            .file-name(data-id="#{file.id}" data-content="#{file.content}" data-previous="#{file.previous}") #{file.created}
         else
           li No files detected.
       #version

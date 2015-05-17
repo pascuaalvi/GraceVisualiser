@@ -29081,7 +29081,7 @@ exports.GraceHighlightRules = GraceHighlightRules;
 },{}],6:[function(require,module,exports){
 "use strict"
 
-var $, ace;
+var $, ace, setupViews;
 
 ace = require("brace");
 $ = require("jquery");
@@ -29114,7 +29114,28 @@ $(function () {
     console.log("Forward");
   });
 
+  $(".file-name").click(function () {
+    var currentText = $(this).data("content");
+    console.log("CURRENT: "+currentText); 
+    var nextText = $("[data-previous='" + $(this).data("id") + "']").data("content");
+    console.log("NEXT: "+nextText);
+    editorCurrent.setReadOnly(false);
+    editorCurrent.setValue(currentText);
+    editorCurrent.setReadOnly(true);
 
+    editorNext.setReadOnly(false);
+    editorNext.setValue(nextText);
+    editorNext.setReadOnly(true);
+
+  });
+
+  /*
+  view.on("click", ".file-name" ,function () {
+    var text = $(this).data("content");
+    console.log(text);
+    editorCurrent.setSession(text);
+  });
+  */
 
 });
 },{"./ace/mode-grace":5,"brace":2,"brace/ext/searchbox":1,"jquery":4}]},{},[6]);
