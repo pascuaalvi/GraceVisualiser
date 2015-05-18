@@ -41,7 +41,11 @@ router.get('/code', function (req, res) {
 		console.log("Rendering...");  
 		console.log(fileArray);
 		setTimeout(function(){
-			res.render('viz', { title: 'Grace Visualize', files:fileArray});
+			res.render('viz', {
+        fileToViz: fileName,
+        title: 'Graceful Visualizer',
+        files: fileArray
+      });
 		}, 10);
 		 
 	});

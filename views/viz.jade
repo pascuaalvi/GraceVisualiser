@@ -1,13 +1,15 @@
 html(lang='en')
   head
     meta(charset='utf-8')
-    title Grace Editor
+    title #{title}
     link(rel='stylesheet', href='stylesheets/layout.css')
     script(src='scripts/visual.js')
   body.horizontal
     nav#left-sidebar-states.vertical.no-select.fill-height
       header.header.horizontal
-        p Grace Visualizer
+        .fill
+        p Visualizing:    #{fileToViz}
+        .fill
       header.header.horizontal
         a.button(href='/',style='color: #b58900;')
           .icon ←
