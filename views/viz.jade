@@ -3,13 +3,14 @@ html(lang='en')
     meta(charset='utf-8')
     title #{title}
     link(rel='stylesheet', href='stylesheets/layout.css')
+    link(rel='stylesheet', href='stylesheets/codemirror.css')
+    link(rel='stylesheet', href='stylesheets/merge.css')      
+    script(src='scripts/merge/codemirror.js')   
+    script(src='scripts/merge/dep/diff_match_patch.js')
+    script(src='scripts/merge/merge.js')
     script(src='scripts/visual.js')
   body.horizontal
     nav#left-sidebar-states.vertical.no-select.fill-height
-      header.header.horizontal
-        .fill
-        p Visualizing:    #{fileToViz}
-        .fill
       header.header.horizontal
         a.button(href='/',style='color: #b58900;')
           .icon ←
@@ -25,23 +26,27 @@ html(lang='en')
       #version
     #left-sidebar-resize.no-select
     #grace-view.view.vertical.fill.fill-height
-      section.open-file.vertical.fill.no-select
+      section.open-file.vertical.fill.no-select      
         header.header.horizontal
           p Current View
-        .editor-current.fill.fill-width
-        header.header.horizontal
+          .fill
+          .fill
+          .fill
+          p Visualizing:    #{fileToViz}
+          .fill
+          .fill
+          .fill
+           p Next View
+        header.header.horizontal.editor
           .fill
           .back.button
             span.icon ⇦
             span.label Back
           .fill
-      section.open-file.vertical.fill.no-select      
-        header.header.horizontal
-          p Next View
-        .editor-next.fill.fill-width
-        header.header.horizontal
-          .fill
           .forward.button
             span.label Forward
             span.icon ⇨
           .fill
+        #editor-diff.editor.fill.fill-width
+        
+        

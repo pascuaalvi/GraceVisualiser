@@ -1,6 +1,6 @@
 "use strict"
 
-var $, ace, setupViews;
+var $, ace,setupViews;
 
 ace = require("brace");
 $ = require("jquery");
@@ -9,16 +9,36 @@ require("brace/ext/searchbox");
 require("./ace/mode-grace");
 
 $(function () {
-  var back, editorCurrent, editorNext, filestates, forward, view;
+  var back, diffView, filestates, forward, view;
 
   view = $("#grace-view");
 
-  editorCurrent = ace.edit(view.find(".editor-current")[0]);
-  editorNext =  ace.edit(view.find(".editor-next")[0]);
+  /*
+    editorCurrent = ace.edit(view.find(".editor-current")[0]);
+    editorNext =  ace.edit(view.find(".editor-next")[0]);
+  */
 
-  editorCurrent.setReadOnly(true);
-  editorNext.setReadOnly(true);
+  //editorCurrent = CodeMirror.fromTextArea(view.find(".editor-diff")[0]);
 
+  /*
+    editorCurrent = CodeMirror(view.find("#editor-diff")[0],{
+      theme: "eclipse",
+      lineNumbers: true,
+      mode: "htmlmixed"
+    });
+  */
+
+  diffView = CodeMirror.MergeView(document.getElementById("editor-diff"), {
+                value: "No State Selected",
+                orig: "No State Selected",
+                lineNumbers: true,
+                mode: "javascript",
+                highlightDifferences: true
+            });
+
+  diffView.readOnly = true;
+
+  view.find(".CodeMirror-merge-2pane")[0].className = view.find(".CodeMirror-merge-2pane")[0].className + " horizontal";
 
   filestates = view.find(".filestate");
 
@@ -34,18 +54,26 @@ $(function () {
   });
 
   $(".file-name").click(function () {
+    var editor = document.getElementById("editor-diff");
     var currentText = $(this).data("content");
-    console.log("CURRENT: "+currentText); 
     var nextText = $("[data-previous='" + $(this).data("id") + "']").data("content");
-    console.log("NEXT: "+nextText);
-    editorCurrent.setReadOnly(false);
-    editorCurrent.setValue(currentText);
-    editorCurrent.setReadOnly(true);
+    var highlight = true;
 
-    editorNext.setReadOnly(false);
-    editorNext.setValue(nextText);
-    editorNext.setReadOnly(true);
+    if(nextText === undefined){
+      nextText = "No Next State";
+      highlight = false;
+    }
 
+    editor.innerHTML = "";
+    diffView = CodeMirror.MergeView(editor, {
+        value: nextText,
+        origLeft: currentText,
+        lineNumbers: true,
+        mode: "javascript",
+        highlightDifferences: highlight
+    });
+    view.find(".CodeMirror-merge-2pane")[0].className = view.find(".CodeMirror-merge-2pane")[0].className + " horizontal";
+    diffView.readOnly = true;
   });
 
   /*
