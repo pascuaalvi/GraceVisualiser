@@ -66,12 +66,13 @@ $(function () {
 
     editor.innerHTML = "";
     diffView = CodeMirror.MergeView(editor, {
-        value: nextText,
         origLeft: currentText,
+        value: nextText,
         lineNumbers: true,
         mode: "javascript",
         highlightDifferences: highlight
     });
+
     view.find(".CodeMirror-merge-2pane")[0].className = view.find(".CodeMirror-merge-2pane")[0].className + " horizontal";
     diffView.readOnly = true;
   });
