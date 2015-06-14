@@ -34,6 +34,11 @@ template {
   flex: 1;
 }
 
+.selected {
+  font-weight: bold; 
+  color: rgb(255, 0, 0);
+}
+
 html, body, .fill-height {
   box-sizing: border-box;
   height: 100%;

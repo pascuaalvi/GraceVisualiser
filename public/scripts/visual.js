@@ -29156,6 +29156,8 @@ $(function () {
 
     view.find(".CodeMirror-merge-2pane")[0].className = view.find(".CodeMirror-merge-2pane")[0].className + " horizontal";
     diffView.readOnly = true;
+    $(".file-name").removeClass( "selected" );
+    $(this).addClass("selected");
   });
 
   /*
