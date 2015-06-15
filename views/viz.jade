@@ -4,7 +4,8 @@ html(lang='en')
     title #{title}
     link(rel='stylesheet', href='stylesheets/layout.css')
     link(rel='stylesheet', href='stylesheets/codemirror.css')
-    link(rel='stylesheet', href='stylesheets/merge.css')      
+    link(rel='stylesheet', href='stylesheets/merge.css')  
+    script(src='scripts/http-client.js')    
     script(src='scripts/merge/codemirror.js')   
     script(src='scripts/merge/dep/diff_match_patch.js')
     script(src='scripts/merge/merge.js')
@@ -12,9 +13,8 @@ html(lang='en')
   body.horizontal
     nav#left-sidebar-states.vertical.no-select.fill-height
       header.header.horizontal
-        a.button(href='/',style='color: #b58900;')
-          .icon ←
-          .label Back To Editor
+        a.backToEditor.button(href='/',style='color: #b58900;')
+          ← Back To Editor
         .fill
       input#upload-input(type='file', multiple='')
       ul#file-tree-vis.fill
@@ -37,7 +37,7 @@ html(lang='en')
           .fill
           .fill
            p Next View
-        header.header.horizontal.editor
+        header.header.horizontal.editor(style='display:none')
           .fill
           .back.button
             span.icon ⇦

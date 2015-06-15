@@ -236,6 +236,16 @@ exports.setup = function (files, view, fdbk) {
     editor.focus();
   });
 
+  $(document).click(function(event) {
+    var aClient = new HttpClient();
+    var text = $(event.target).attr('class');
+    if(text != undefined){
+      console.log(text);
+      aClient.post("/service/click", "clickEvent="+text, function (response) {
+      });
+    }
+  });
+
   drop.click(function () {
     console.log("IM ALIVE");
     if (confirm("Are you sure you want to delete this file?")) {

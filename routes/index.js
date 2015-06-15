@@ -9,6 +9,7 @@ router.get('/', function (req, res) {
   res.render('index', { title: 'Grace Editor' });
 });
 
+// Get the files
 router.get('/code', function (req, res) {
   // Filename of file to get states of
   var fileName = req.query.fileName;
@@ -51,12 +52,59 @@ router.get('/code', function (req, res) {
 	});
 });
 
-// Get the files
-router.get("/service/file",
+// For analysis - count clicks on elements
+router.post("/service/click",
   function (req, res) {
     var db = req.db;
+    // The event
+    var clickEvent = req.body.clickEvent;
+    // Is it a new click event?
+    var isNewClickEvent = true;
+    // If not, then how many clicks do we have so far?
+    var clicks = 0;
+    // Check if it exists
+    db.serialize(function() {
+      var exists = "SELECT count(*) as numRows FROM clickdata "
+        + "WHERE elementName='" + clickEvent+"'";
+      // Check if element exists in DB already (table: clickdata)
+      db.each(exists, function(err, row) {
+        if(row.numRows === 0){
+          console.log('Click Event not defined yet.');
+        }
+        else {
+          isNewClickEvent = false;
+          console.log("Click Event found in DB.");          
+        }
+      });
+      setTimeout(function(){
+        // Only when updating click event tally
+        if(!isNewClickEvent){
+          var counter = "SELECT clicks FROM clickdata "
+            + "WHERE elementName='" + clickEvent+"'";
+          db.each(counter, function(err, row) {
+            clicks = row.clicks;
+          });
+        }
 
-    res.send("Hello world!");
+        setTimeout(function(){
+          // Do writes to database
+          db.serialize(function() {      
+            if(isNewClickEvent){
+              var newClick = db.run(
+                      "INSERT INTO clickdata (elementName, clicks) VALUES ('"
+                        +clickEvent+"',"+1+")");
+            }
+            else {
+              var newClicks = clicks+1;
+              console.log("NEWCOUNT: "+newClicks);
+              var updateClick = db.run(
+                      "UPDATE clickdata SET clicks="+newClicks
+                      +" WHERE elementName='"+clickEvent+"'");
+            }
+          });
+        }, 1);
+      }, 1);
+    });
   }
 );
 
@@ -113,7 +161,7 @@ router.post('/service/file/save',
             db.each(compare, function(err, row) {
               if(filecontent === row.filecontent){
                 isNewState = false;
-                console.log("GESUNDHEIT!");
+                console.log("File content is the same as before!");
               } 
             });
           }
@@ -134,8 +182,8 @@ router.post('/service/file/save',
 
             setTimeout(function() {
               if(isNewState){
-                // res.send("File Saved");
-                res.send("ID: "+guid+" TIME: "+created+" NAME: " + filename + " CONTENT: "+filecontent);
+                res.send("File Saved");
+                //res.send("ID: "+guid+" TIME: "+created+" NAME: " + filename + " CONTENT: "+filecontent);
               }
               else {
                 res.send("You haven't made any changes!");
