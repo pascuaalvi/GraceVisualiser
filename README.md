@@ -8,3 +8,7 @@ can be viewed using the Grace Visualizer.
 Original editor by zmthy: 
 
 https://github.com/gracelang/grace-web-editor
+
+Minigrace by mwh:
+
+https://github.com/mwh/minigrace
