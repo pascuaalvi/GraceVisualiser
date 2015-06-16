@@ -1,7 +1,7 @@
 {
   "name": "graceide",
   "version": "0.1.1",
-  "description": "A web editor for Minigrace, with code analysis by pascuaalvi.",
+  "description": "A web editor for Minigrace, with code analysis by pascuaalvi. Minigrace by mwh.",
   "scripts": {
     "lint": "node_modules/eslint/bin/eslint.js app.js public/scripts",
     "prepublish": "sh initialize.sh"
