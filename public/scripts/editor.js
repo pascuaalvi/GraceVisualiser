@@ -247,6 +247,17 @@ exports.setup = function (files, view, fdbk) {
     }
   });
 
+  window.onbeforeunload = function (evt) {
+    var message = 'Did you remember to save your work?';
+    if (typeof evt == 'undefined') {
+      evt = window.event;
+    }
+    if (evt ) {
+     evt.returnValue = message;
+    }
+      return message;
+  }
+
   drop.click(function () {
     console.log("IM ALIVE");
     if (confirm("Are you sure you want to delete this file?")) {

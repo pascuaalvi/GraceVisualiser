@@ -44969,17 +44969,30 @@ exports.setup = function (files, view, fdbk) {
     view.removeClass("hidden");
     editor.focus();
   });
-  /*
+  
   $(document).click(function(event) {
     var aClient = new HttpClient();
     var text = $(event.target).attr('class');
     if(text != undefined){
+      if(text.indexOf("save") > -1 && text.indexOf("visualise") > -1)
       console.log(text);
       aClient.post("/service/click", "clickEvent="+text, function (response) {
       });
     }
   });
-*/
+
+  window.onbeforeunload = function (evt) {
+    var message = 'Did you remember to save your work?';
+    if (typeof evt == 'undefined') {
+      evt = window.event;
+
+    }
+    if (evt ) {
+     evt.returnValue = message;
+    }
+      return message;
+  }
+
   drop.click(function () {
     console.log("IM ALIVE");
     if (confirm("Are you sure you want to delete this file?")) {
