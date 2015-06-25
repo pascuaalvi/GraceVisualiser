@@ -4,6 +4,66 @@ var router = express.Router();
 /* GET home page. */
 console.log("Loading Index");
 
+/* 
+  Click Event Method
+
+  I separated it from the /service/click endpoint in order to
+  prevent request collisions with the following:
+    - Visualise request
+    - Save request
+ */
+addClickEvent = function (db, clickEventString){
+  // Is it a new click event?
+  var isNewClickEvent = true;
+  // If not, then how many clicks do we have so far?
+  var clicks = 0;
+  // Check if it exists
+  setTimeout(function(){
+    db.serialize(function() {
+      var exists = "SELECT count(*) as numRows FROM clickdata "
+        + "WHERE elementName='" + clickEventString+"'";
+      // Check if element exists in DB already (table: clickdata)
+      db.each(exists, function(err, row) {
+        if(row.numRows === 0){
+          console.log('Click Event not defined yet.');
+        }
+        else {
+          isNewClickEvent = false;
+          console.log("Click Event found in DB.");          
+        }
+      });
+      setTimeout(function(){
+        // Only when updating click event tally
+        if(!isNewClickEvent){
+          var counter = "SELECT clicks FROM clickdata "
+            + "WHERE elementName='" + clickEventString+"'";
+          db.each(counter, function(err, row) {
+            clicks = row.clicks;
+          });
+        }
+
+        setTimeout(function(){
+          // Do writes to database
+          db.serialize(function() {      
+            if(isNewClickEvent){
+              var newClick = db.run(
+                      "INSERT INTO clickdata (elementName, clicks) VALUES ('"
+                        +clickEventString+"',"+1+")");
+            }
+            else {
+              var newClicks = clicks+1;
+              console.log("NEWCOUNT: "+newClicks);
+              var updateClick = db.run(
+                      "UPDATE clickdata SET clicks="+newClicks
+                      +" WHERE elementName='"+clickEventString+"'");
+            }
+          });
+        }, 1000);
+      }, 1);
+    });
+  }, 1);
+}
+
 // Routes
 router.get('/', function (req, res) {
   res.render('index', { title: 'Grace Editor' });
@@ -42,6 +102,7 @@ router.get('/code', function (req, res) {
 		console.log("Rendering...");  
 		console.log(fileArray);
 		setTimeout(function(){
+      addClickEvent(db, "visualize button");
 			res.render('viz', {
         fileToViz: fileName,
         title: 'Graceful Visualizer',
@@ -58,55 +119,8 @@ router.post("/service/click",
     var db = req.db;
     // The event
     var clickEvent = req.body.clickEvent;
-    // Is it a new click event?
-    var isNewClickEvent = true;
-    // If not, then how many clicks do we have so far?
-    var clicks = 0;
-    // Check if it exists
-    db.serialize(function() {
-      var exists = "SELECT count(*) as numRows FROM clickdata "
-        + "WHERE elementName='" + clickEvent+"'";
-      // Check if element exists in DB already (table: clickdata)
-      db.each(exists, function(err, row) {
-        if(row.numRows === 0){
-          console.log('Click Event not defined yet.');
-        }
-        else {
-          isNewClickEvent = false;
-          console.log("Click Event found in DB.");          
-        }
-      });
-      setTimeout(function(){
-        // Only when updating click event tally
-        if(!isNewClickEvent){
-          var counter = "SELECT clicks FROM clickdata "
-            + "WHERE elementName='" + clickEvent+"'";
-          db.each(counter, function(err, row) {
-            clicks = row.clicks;
-          });
-        }
-
-        setTimeout(function(){
-          // Do writes to database
-          db.serialize(function() {      
-            if(isNewClickEvent){
-              var newClick = db.run(
-                      "INSERT INTO clickdata (elementName, clicks) VALUES ('"
-                        +clickEvent+"',"+1+")");
-            }
-            else {
-              var newClicks = clicks+1;
-              console.log("NEWCOUNT: "+newClicks);
-              var updateClick = db.run(
-                      "UPDATE clickdata SET clicks="+newClicks
-                      +" WHERE elementName='"+clickEvent+"'");
-            }
-          });
-        }, 1);
-      }, 1);
-    });
-  }
-);
+    addClickEvent(db, clickEvent);
+});
 
 // Add some files and store an initial state
 // If already added, just store a state w/
@@ -181,6 +195,7 @@ router.post('/service/file/save',
             });
 
             setTimeout(function() {
+              addClickEvent(db, "saveFile button");
               if(isNewState){
                 res.send("File Saved");
                 //res.send("ID: "+guid+" TIME: "+created+" NAME: " + filename + " CONTENT: "+filecontent);
@@ -193,7 +208,8 @@ router.post('/service/file/save',
         }, 1);
       }, 1);
     });
-});
+  }
+);
 
 router["delete"]("/service/file/new/:id",
   function (req, res) {

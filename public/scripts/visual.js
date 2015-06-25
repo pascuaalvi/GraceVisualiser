@@ -29163,6 +29163,7 @@ $(function () {
     var aClient = new HttpClient();
     var text = $(event.target).attr('class');
     if(text != undefined){
+      if(text.indexOf("save") > -1 && text.indexOf("visualise") > -1)
       console.log(text);
       aClient.post("/service/click", "clickEvent="+text, function (response) {
       });

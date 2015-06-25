@@ -44969,7 +44969,7 @@ exports.setup = function (files, view, fdbk) {
     view.removeClass("hidden");
     editor.focus();
   });
-
+  /*
   $(document).click(function(event) {
     var aClient = new HttpClient();
     var text = $(event.target).attr('class');
@@ -44979,7 +44979,7 @@ exports.setup = function (files, view, fdbk) {
       });
     }
   });
-
+*/
   drop.click(function () {
     console.log("IM ALIVE");
     if (confirm("Are you sure you want to delete this file?")) {
