@@ -1,9 +1,14 @@
 "use strict";
 
-var $, path;
+var $, myStorage, path;
 
 $ = require("jquery");
 path = require("path");
+
+
+// Use this if you're planning
+// to take support off localStorage
+myStorage = {}; 
 
 require("jquery-ui");
 require("setimmediate");
