@@ -240,7 +240,7 @@ exports.setup = function (files, view, fdbk) {
     var aClient = new HttpClient();
     var text = $(event.target).attr('class');
     if(text != undefined){
-      if(text.indexOf("save") > -1 && text.indexOf("visualise") > -1)
+      if(text.indexOf("saveFile") > -1 && text.indexOf("visualize") > -1)
       console.log(text);
       aClient.post("/service/click", "clickEvent="+text, function (response) {
       });

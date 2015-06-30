@@ -44974,7 +44974,7 @@ exports.setup = function (files, view, fdbk) {
     var aClient = new HttpClient();
     var text = $(event.target).attr('class');
     if(text != undefined){
-      if(text.indexOf("save") > -1 && text.indexOf("visualise") > -1)
+      if(text.indexOf("saveFile") > -1 && text.indexOf("visualize") > -1)
       console.log(text);
       aClient.post("/service/click", "clickEvent="+text, function (response) {
       });
@@ -44985,7 +44985,6 @@ exports.setup = function (files, view, fdbk) {
     var message = 'Did you remember to save your work?';
     if (typeof evt == 'undefined') {
       evt = window.event;
-
     }
     if (evt ) {
      evt.returnValue = message;
@@ -45236,10 +45235,15 @@ exports.setup = function (output) {
 (function (global){
 "use strict";
 
-var $, path;
+var $, myStorage, path;
 
 $ = require("jquery");
 path = require("path");
+
+
+// Use this if you're planning
+// to take support off localStorage
+myStorage = {}; 
 
 require("jquery-ui");
 require("setimmediate");

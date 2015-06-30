@@ -18,50 +18,47 @@ addClickEvent = function (db, clickEventString){
   // If not, then how many clicks do we have so far?
   var clicks = 0;
   // Check if it exists
-  setTimeout(function(){
-    db.serialize(function() {
-      var exists = "SELECT count(*) as numRows FROM clickdata "
-        + "WHERE elementName='" + clickEventString+"'";
-      // Check if element exists in DB already (table: clickdata)
-      db.each(exists, function(err, row) {
-        if(row.numRows === 0){
-          console.log('Click Event not defined yet.');
+  db.serialize(function() {
+    var exists = "SELECT count(*) as numRows FROM clickdata "
+      + "WHERE elementName='" + clickEventString+"'";
+    // Check if element exists in DB already (table: clickdata)
+    db.each(exists, function(err, row) {
+      if(row.numRows === 0){
+        console.log('Click Event not defined yet.');
+      }
+      else {
+        isNewClickEvent = false;
+        console.log("Click Event found in DB.");          
+      }
+    }, function(){
+      function next(){
+        // Do writes to database  
+        if(isNewClickEvent){
+          var newClick = db.run(
+                  "INSERT INTO clickdata (elementName, clicks) VALUES ('"
+                    +clickEventString+"',"+1+")");
         }
         else {
-          isNewClickEvent = false;
-          console.log("Click Event found in DB.");          
+          var newClicks = clicks+1;
+          console.log("NEWCOUNT: "+newClicks);
+          var updateClick = db.run(
+                  "UPDATE clickdata SET clicks="+newClicks
+                  +" WHERE elementName='"+clickEventString+"'");
         }
-      });
-      setTimeout(function(){
-        // Only when updating click event tally
-        if(!isNewClickEvent){
-          var counter = "SELECT clicks FROM clickdata "
-            + "WHERE elementName='" + clickEventString+"'";
-          db.each(counter, function(err, row) {
-            clicks = row.clicks;
-          });
-        }
+      }
 
-        setTimeout(function(){
-          // Do writes to database
-          db.serialize(function() {      
-            if(isNewClickEvent){
-              var newClick = db.run(
-                      "INSERT INTO clickdata (elementName, clicks) VALUES ('"
-                        +clickEventString+"',"+1+")");
-            }
-            else {
-              var newClicks = clicks+1;
-              console.log("NEWCOUNT: "+newClicks);
-              var updateClick = db.run(
-                      "UPDATE clickdata SET clicks="+newClicks
-                      +" WHERE elementName='"+clickEventString+"'");
-            }
-          });
-        }, 1000);
-      }, 1);
+      // Only when updating click event tally
+      if(!isNewClickEvent){
+        var counter = "SELECT clicks FROM clickdata "
+          + "WHERE elementName='" + clickEventString+"'";
+        db.each(counter, function(err, row) {
+          clicks = row.clicks;
+        }, next);
+      } else {
+        next();
+      }
     });
-  }, 1);
+  });
 }
 
 // Routes
@@ -98,18 +95,14 @@ router.get('/code', function (req, res) {
     	fileArray.push({ id:row.id, created:d, content:row.filecontent, previous: before});
       console.log(row.id + ': ' + row.filecontent + " CREATED: "+d+" BEFORE: "+before);
       before = row.id;
-    });
-		console.log("Rendering...");  
-		console.log(fileArray);
-		setTimeout(function(){
+    }, function(){
       addClickEvent(db, "visualize button");
-			res.render('viz', {
+      res.render('viz', {
         fileToViz: fileName,
         title: 'Graceful Visualizer',
         files: fileArray
       });
-		}, 10);
-		 
+    });		 
 	});
 });
 
@@ -157,18 +150,38 @@ router.post('/service/file/save',
           isNewFile = false;
           console.log("File found in DB.");
         }
-      });
-      setTimeout(function(){
+      }, function() {
+        function response () {
+          addClickEvent(db, "saveFile button");
+          if(isNewState){
+            res.send("File Saved");
+            //res.send("ID: "+guid+" TIME: "+created+" NAME: " + filename + " CONTENT: "+filecontent);
+          }
+          else {
+            res.send("You haven't made any changes!");
+          }
+        }
+
+        function write() {      
+          // If it isn't a new file, then check if content is different.
+          if(isNewState){
+            if(isNewFile){
+              var filenames = db.run(
+                "INSERT INTO files (fileID, filename) VALUES (?,?)",
+                [fileID,filename], response);
+            }
+            var filestates = db.run(
+              "INSERT INTO filestates (uID, fileID, created, filecontent) VALUES (?,?,?,?)",
+                [guid,fileID,created,filecontent],response);            
+          }
+        }
+
         // If so, then use the fileID from that
         if(!isNewFile){
           db.each(search, function(err, row) {
             fileID = row.fileID;
             console.log("Update on file. Using ID: "+fileID);
-          });
-        }
-        setTimeout(function(){
-          // If it isn't a new file, then check if content is different.
-          if(!isNewFile){
+          }, function (){
             var compare = "SELECT filecontent FROM filestates "
             + "WHERE fileID = "+fileID+" "
             + "ORDER BY created DESC LIMIT 1"
@@ -177,36 +190,13 @@ router.post('/service/file/save',
                 isNewState = false;
                 console.log("File content is the same as before!");
               } 
-            });
-          }
-          setTimeout(function(){
-            // Do writes to database
-            db.serialize(function() {      
-              if(isNewState){
-                if(isNewFile){
-                  var filenames = db.run(
-                    "INSERT INTO files (fileID, filename) VALUES ("
-                      +fileID+",'"+filename+"')");
-                }
-                var filestates = db.run(
-                  "INSERT INTO filestates (uID, fileID, created, filecontent) VALUES ("
-                    +guid+","+fileID+","+created+",'"+filecontent+"')");            
-              }
-            });
-
-            setTimeout(function() {
-              addClickEvent(db, "saveFile button");
-              if(isNewState){
-                res.send("File Saved");
-                //res.send("ID: "+guid+" TIME: "+created+" NAME: " + filename + " CONTENT: "+filecontent);
-              }
-              else {
-                res.send("You haven't made any changes!");
-              }
-            }, 1);
-          }, 1);
-        }, 1);
-      }, 1);
+            }, write);
+          });
+        } 
+        else{
+          write()
+        }
+      });
     });
   }
 );
