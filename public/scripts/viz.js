@@ -78,6 +78,7 @@ $(function () {
     console.log("Forward");
   });
 
+  /*
   $(document).click(function(event) {
     var aClient = new HttpClient();
     var text = $(event.target).attr('class');
@@ -86,6 +87,7 @@ $(function () {
       });
     }
   });
+  */
 
   $(".file-name").click(function () {
     var editor = document.getElementById("editor-diff");

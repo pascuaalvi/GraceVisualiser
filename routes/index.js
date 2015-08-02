@@ -12,6 +12,7 @@ console.log("Loading Index");
     - Visualise request
     - Save request
  */
+ /*
 addClickEvent = function (db, clickEventString){
   // Is it a new click event?
   var isNewClickEvent = true;
@@ -60,6 +61,7 @@ addClickEvent = function (db, clickEventString){
     });
   });
 }
+*/
 
 // Routes
 router.get('/', function (req, res) {
@@ -96,7 +98,7 @@ router.get('/code', function (req, res) {
       console.log(row.id + ': ' + row.filecontent + " CREATED: "+d+" BEFORE: "+before);
       before = row.id;
     }, function(){
-      addClickEvent(db, "visualize button");
+      //addClickEvent(db, "visualize button");
       res.render('viz', {
         fileToViz: fileName,
         title: 'Graceful Visualizer',
@@ -107,6 +109,7 @@ router.get('/code', function (req, res) {
 });
 
 // For analysis - count clicks on elements
+/*
 router.post("/service/click",
   function (req, res) {
     var db = req.db;
@@ -114,6 +117,7 @@ router.post("/service/click",
     var clickEvent = req.body.clickEvent;
     addClickEvent(db, clickEvent);
 });
+*/
 
 // Add some files and store an initial state
 // If already added, just store a state w/
@@ -152,7 +156,7 @@ router.post('/service/file/save',
         }
       }, function() {
         function response () {
-          addClickEvent(db, "saveFile button");
+          //addClickEvent(db, "saveFile button");
           if(isNewState){
             res.send("File Saved");
             //res.send("ID: "+guid+" TIME: "+created+" NAME: " + filename + " CONTENT: "+filecontent);

@@ -236,6 +236,7 @@ exports.setup = function (files, view, fdbk) {
     editor.focus();
   });
   
+  /*
   $(document).click(function(event) {
     var aClient = new HttpClient();
     var text = $(event.target).attr('class');
@@ -246,6 +247,7 @@ exports.setup = function (files, view, fdbk) {
       });
     }
   });
+  */
 
   window.onbeforeunload = function (evt) {
     var message = 'Did you remember to save your work?';
