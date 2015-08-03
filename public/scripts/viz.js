@@ -1,12 +1,16 @@
 "use strict"
 
-var $, ace,setupViews;
+var $, ace, compiler, fdbk, path, setupViews;
 
 ace = require("brace");
 $ = require("jquery");
+path = require("path");
 
 require("brace/ext/searchbox");
 require("./ace/mode-grace");
+
+compiler = require("./compiler");
+fdbk = require("./feedback");
 
 HttpClient = function () {
   this.get = function (aUrl, aCallback) {
@@ -34,9 +38,14 @@ HttpClient = function () {
 }
 
 $(function () {
-  var back, diffView, filestates, forward, view;
+  var back, diffView, feedbacks, fileElement, fileName,
+      filestates, forward, i, texts, view;
 
   view = $("#grace-view");
+
+  fileName = $("#file-name")
+
+  fileElement = null;
 
   /*
     editorCurrent = ace.edit(view.find(".editor-current")[0]);
@@ -57,7 +66,7 @@ $(function () {
                 value: "No State Selected",
                 orig: "No State Selected",
                 lineNumbers: true,
-                mode: "javascript",
+                theme: "eclipse",
                 highlightDifferences: true
             });
 
@@ -89,10 +98,22 @@ $(function () {
   });
   */
 
+  function getLeftText() {
+    return $(fileElement).data("content");
+  }
+
+  function getRightText(ctxt) {
+    return $("[data-previous='" + $(fileElement).data("id") + "']").data("content");
+  }
+
   $(".file-name").click(function () {
+    var i;
+
+    fileElement = this;
+
     var editor = document.getElementById("editor-diff");
-    var currentText = $(this).data("content");
-    var nextText = $("[data-previous='" + $(this).data("id") + "']").data("content");
+    var currentText = getLeftText();
+    var nextText = getRightText();
     var highlight = true;
 
     if(nextText === undefined){
@@ -113,6 +134,11 @@ $(function () {
     diffView.readOnly = true;
     $(".file-name").removeClass( "selected" );
     $(this).addClass("selected");
+
+    for (i = 0; i < 2; i += 1) {
+      feedbacks[i].compilation.waiting();
+      feedbacks[i].output.clear();
+    }
   });
 
   /*
@@ -122,5 +148,82 @@ $(function () {
     editorCurrent.setSession(text);
   });
   */
+
+  feedbacks = [];
+  texts = [getLeftText, getRightText];
+
+  for (i = 0; i < 2; i += 1) {
+    (function (i) {
+      var feedback;
+
+      function stop() {
+        feedback.compilation.stop();
+      }
+
+      feedback = fdbk.setup($("#feedback" + i), function () {
+        var modname, name;
+
+        if (fileElement === null || texts[i]() === undefined) {
+          feedback.compilation.waiting();
+          alert("Cannot build when no state selected.");
+          return;
+        }
+
+        name = fileName.text();
+        modname = path.basename(name, ".grace");
+
+        compiler.compile(modname, texts[i](), function (reason) {
+          if (reason !== null) {
+            feedback.error(reason);
+
+            // if (reason.module === name && reason.line) {
+            //   session.setAnnotations([ {
+            //     "row": reason.line - 1,
+            //     "column": reason.column && reason.column - 1,
+            //     "type": "error",
+            //     "text": reason.message
+            //   } ]);
+            // }
+          } else {
+            feedback.compilation.ready();
+          }
+        });
+      }, function () {
+        var escaped, modname;
+
+        feedback.running();
+
+        modname = path.basename(fileName.text(), ".grace");
+        escaped = "gracecode_" + modname.replace("/", "$");
+
+        global.gracecode_main = global[escaped];
+        global.theModule = global[escaped];
+
+        minigrace.lastSourceCode = texts[i]();
+        minigrace.lastModname = modname;
+        minigrace.lastMode = "js";
+        minigrace.lastDebugMode = true;
+
+        minigrace.stdout_write = function (value) {
+          feedback.output.write(value);
+        };
+
+        minigrace.stderr_write = function (value) {
+          feedback.output.error(value);
+          stop();
+        };
+
+        try {
+          minigrace.run();
+        } catch (error) {
+          feedback.output.error(error.toString());
+        } finally {
+          stop();
+        }
+      });
+
+      feedbacks.push(feedback);
+    }(i));
+  }
 
 });

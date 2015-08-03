@@ -486,3 +486,17 @@ a {
   top: -1000000px;
   left: -1000000px;
 }
+
+.feedbacks {
+  display: flex;
+  flex-direction: row;
+  flex: 0 0 200px;
+}
+
+.feedbacks .feedback:first-child {
+  margin-right: 41px;
+}
+
+.feedbacks .feedback:last-child {
+  margin-left: 41px;
+}

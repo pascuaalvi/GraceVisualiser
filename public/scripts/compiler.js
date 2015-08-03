@@ -53,6 +53,7 @@ function compile(name, source, callback) {
         global["eval"]("var myframe;" + output +
                        ";window." + escaped + "=" + escaped);
       } catch (error) {
+        console.log(error);
         callback({
           "line": 1,
           "column": 1,

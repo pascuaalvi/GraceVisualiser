@@ -4,12 +4,14 @@ html(lang='en')
     title #{title}
     link(rel='stylesheet', href='stylesheets/layout.css')
     link(rel='stylesheet', href='stylesheets/codemirror.css')
-    link(rel='stylesheet', href='stylesheets/merge.css')  
+    link(rel='stylesheet', href='stylesheets/merge.css')
+    link(rel='stylesheet', href='stylesheets/eclipse.css')  
     script(src='scripts/http-client.js')    
     script(src='scripts/merge/codemirror.js')   
     script(src='scripts/merge/dep/diff_match_patch.js')
     script(src='scripts/merge/merge.js')
     script(src='scripts/visual.js')
+    script(src='scripts/minigrace.js')
   body.horizontal
     nav#left-sidebar-states.vertical.no-select.fill-height
       header.header.horizontal
@@ -25,14 +27,15 @@ html(lang='en')
           li No files detected.
       #version
     #left-sidebar-resize.no-select
-    #grace-view.view.vertical.fill.fill-height
-      section.open-file.vertical.fill.no-select      
+    #grace-view.view.fill.fill-height(style='display: flex; flex-direction: column;')
+      section.vertical.fill.no-select
         header.header.horizontal
           p Current View
           .fill
           .fill
           .fill
-          p Code History of #{fileToViz}
+          p Code History of 
+            span#file-name #{fileToViz}
           .fill
           .fill
           .fill
@@ -47,6 +50,37 @@ html(lang='en')
             span.label Forward
             span.icon ⇨
           .fill
-        #editor-diff.editor.fill.fill-width
-        
-        
+        #editor-diff.editor.fill(style='position: relative;')
+      .feedbacks
+        section#feedback0.feedback.fill.vertical
+          .compilation.no-select
+            header.header.horizontal.waiting
+              .run.button.fill
+                span.label.run Run                         
+                span.icon &#x25B6;                     
+              .build.fill.button
+                span.label.build Build                         
+                span.icon &#x2692;                     
+              .wait.fill
+                span.label Building
+                span.dots ...                     
+              .stop.button.fill
+                span.label.stop Stop                         
+                span.icon &#x25A0;
+          pre.output.fill.
+        section#feedback1.feedback.fill.vertical
+          .compilation.no-select
+            header.header.horizontal.waiting
+              .run.button.fill
+                span.label.run Run                         
+                span.icon &#x25B6;                     
+              .build.fill.button
+                span.label.build Build                         
+                span.icon &#x2692;                     
+              .wait.fill
+                span.label Building
+                span.dots ...                     
+              .stop.button.fill
+                span.label.stop Stop                         
+                span.icon &#x25A0;
+          pre.output.fill.

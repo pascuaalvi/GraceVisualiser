@@ -18730,6 +18730,294 @@ function get_blob() {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],4:[function(require,module,exports){
+(function (process){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length - 1; i >= 0; i--) {
+    var last = parts[i];
+    if (last === '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
+
+  return parts;
+}
+
+// Split a filename into [root, dir, basename, ext], unix version
+// 'root' is just a slash, or nothing.
+var splitPathRe =
+    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+var splitPath = function(filename) {
+  return splitPathRe.exec(filename).slice(1);
+};
+
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+  var resolvedPath = '',
+      resolvedAbsolute = false;
+
+  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+    var path = (i >= 0) ? arguments[i] : process.cwd();
+
+    // Skip empty and invalid entries
+    if (typeof path !== 'string') {
+      throw new TypeError('Arguments to path.resolve must be strings');
+    } else if (!path) {
+      continue;
+    }
+
+    resolvedPath = path + '/' + resolvedPath;
+    resolvedAbsolute = path.charAt(0) === '/';
+  }
+
+  // At this point the path should be resolved to a full absolute path, but
+  // handle relative paths to be safe (might happen when process.cwd() fails)
+
+  // Normalize the path
+  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
+
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+  var isAbsolute = exports.isAbsolute(path),
+      trailingSlash = substr(path, -1) === '/';
+
+  // Normalize the path
+  path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+
+  return (isAbsolute ? '/' : '') + path;
+};
+
+// posix version
+exports.isAbsolute = function(path) {
+  return path.charAt(0) === '/';
+};
+
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    if (typeof p !== 'string') {
+      throw new TypeError('Arguments to path.join must be strings');
+    }
+    return p;
+  }).join('/'));
+};
+
+
+// path.relative(from, to)
+// posix version
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+};
+
+exports.sep = '/';
+exports.delimiter = ':';
+
+exports.dirname = function(path) {
+  var result = splitPath(path),
+      root = result[0],
+      dir = result[1];
+
+  if (!root && !dir) {
+    // No dirname whatsoever
+    return '.';
+  }
+
+  if (dir) {
+    // It has a dirname, strip trailing slash
+    dir = dir.substr(0, dir.length - 1);
+  }
+
+  return root + dir;
+};
+
+
+exports.basename = function(path, ext) {
+  var f = splitPath(path)[2];
+  // TODO: make this comparison case-insensitive on windows?
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+
+exports.extname = function(path) {
+  return splitPath(path)[3];
+};
+
+function filter (xs, f) {
+    if (xs.filter) return xs.filter(f);
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (f(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b'
+    ? function (str, start, len) { return str.substr(start, len) }
+    : function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    }
+;
+
+}).call(this,require('_process'))
+},{"_process":5}],5:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    draining = true;
+    var currentQueue;
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        var i = -1;
+        while (++i < len) {
+            currentQueue[i]();
+        }
+        len = queue.length;
+    }
+    draining = false;
+}
+process.nextTick = function (fun) {
+    queue.push(fun);
+    if (!draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],6:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -27941,7 +28229,7 @@ return jQuery;
 
 }));
 
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 ace.define('ace/mode/grace', ['acequire', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/javascript', 'ace/tokenizer', 'ace/mode/grace_highlight_rules'], function(acequire, exports, module) {
 "use strict";
 
@@ -29078,16 +29366,390 @@ oop.inherits(GraceHighlightRules, TextHighlightRules);
 exports.GraceHighlightRules = GraceHighlightRules;
 });
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
+(function (global){
+"use strict";
+
+var $, path, queue, worker;
+
+$ = require("jquery");
+path = require("path");
+
+queue = {};
+worker = new Worker("scripts/background.js");
+
+function pump(name, key, value) {
+  var i, l, q;
+
+  q = queue[name] || [];
+
+  for (i = 0, l = q.length; i < l; i += 1) {
+    q[i][key](value);
+  }
+
+  delete queue[name];
+}
+
+function isCompiled(name) {
+  return global.hasOwnProperty("gracecode_" + path.basename(name, ".grace"));
+}
+
+exports.isCompiled = isCompiled;
+
+exports.isCompiling = function (name) {
+  name = path.basename(name, ".grace");
+
+  return queue[name] && queue[name].length > 0;
+};
+
+exports.forget = function (name) {
+  name = path.basename(name, ".grace");
+  delete global["gracecode_" + name];
+
+  worker.postMessage({
+    "action": "forget",
+    "name": name
+  });
+};
+
+function compile(name, source, callback) {
+  var callbacks = queue[name] || [];
+
+  callbacks.push({
+    "onSuccess": function (output) {
+      var escaped = "gracecode_" + name.replace("/", "$");
+
+      try {
+        global["eval"]("var myframe;" + output +
+                       ";window." + escaped + "=" + escaped);
+      } catch (error) {
+        console.log(error);
+        callback({
+          "line": 1,
+          "column": 1,
+          "type": "error",
+          "text": error.message || error
+        });
+        return;
+      }
+
+      callback(null, output);
+    },
+
+    "onFailure": callback
+  });
+
+  if (!queue.hasOwnProperty(name)) {
+    worker.postMessage({
+      "action": "compile",
+      "name": name,
+      "source": source
+    });
+
+    queue[name] = callbacks;
+  }
+}
+
+exports.compile = compile;
+
+worker.onmessage = function (event) {
+  var count, match, output, recompile, regexp, result;
+
+  result = event.data;
+
+  function respond(error) {
+    if (count === 0) {
+      return;
+    }
+
+    if (error !== null) {
+      count = 0;
+      pump(result.name, "onFailure", error);
+    } else {
+      count -= 1;
+
+      if (count === 0) {
+        pump(result.name, "onSuccess", result.output);
+      }
+    }
+  }
+
+  if (result.isSuccessful) {
+    output = result.output;
+    regexp = /do_import\("(\w+)", \w+\)/;
+
+    match = output.match(regexp);
+
+    if (match !== null) {
+      recompile = [];
+
+      do {
+        if (!isCompiled(match[1])) {
+          if (!localStorage.hasOwnProperty("file:" + match[1] + ".grace")) {
+            pump(result.name, "onFailure", {
+              "message": 'Cannot find module "' + match[1] + '"'
+            });
+
+            return;
+          }
+
+          recompile.push(match[1]);
+        }
+
+        output = output.substring(match.index + match[0].length);
+        match = output.match(regexp);
+      } while (match !== null);
+
+      if (recompile.length > 0) {
+        count = recompile.length;
+        recompile.forEach(function (name) {
+          compile(name, localStorage["file:" + name + ".grace"], respond);
+        });
+
+        return;
+      }
+    }
+
+    pump(result.name, "onSuccess", result.output);
+  } else if (result.dependency) {
+    if (queue[result.dependency]) {
+      worker.postMessage({
+        "action": "compile",
+        "name": result.name
+      });
+    } else if (localStorage.hasOwnProperty("file:" +
+        result.dependency + ".grace")) {
+      compile(result.dependency,
+        localStorage["file:" + result.dependency + ".grace"], function (error) {
+          if (error !== null) {
+            pump(result.name, "onFailure", error);
+          } else {
+            worker.postMessage({
+              "action": "compile",
+              "name": result.name
+            });
+          }
+        });
+    } else {
+      pump(result.name, "onFailure", {
+        "message": 'Cannot find module "' + result.dependency + '"'
+      });
+    }
+  } else {
+    pump(result.name, "onFailure", result.reason);
+  }
+};
+
+$(function () {
+  //  $("#version").text(MiniGrace.version);
+});
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"jquery":6,"path":4}],9:[function(require,module,exports){
+// Sets up the various parts of the feedback system.
+
+"use strict";
+
+var compilation, output;
+
+compilation = require("./feedback/compilation");
+output = require("./feedback/output");
+
+exports.setup = function (feedback, onBuild, onRun) {
+  var comp, op;
+
+  op = output.setup(feedback.find(".output"));
+  comp = compilation.setup(feedback.find(".compilation"), op, function () {
+    op.clear();
+    onBuild();
+  }, onRun);
+
+  // Stabilise the feedback width so that writing overly long lines to the
+  // output does not cause it to wrap.
+  feedback.width(feedback.width()).resize(function () {
+    feedback.width(null).width(feedback.width());
+  });
+
+  return {
+    "compilation": comp,
+    "output": op,
+
+    "running": function () {
+      op.clear();
+      comp.running();
+    },
+
+    "error": function (reason, gotoLine) {
+      comp.waiting();
+      op.error(reason, gotoLine);
+    }
+  };
+};
+
+},{"./feedback/compilation":10,"./feedback/output":11}],10:[function(require,module,exports){
+// Handles the feedback for the compilation reporting.
+
+"use strict";
+
+exports.setup = function (compilation, output, onBuild, onRun) {
+  var build, dots, header, interval, onStop, run, stop;
+
+  interval = null;
+
+  header = compilation.children("header");
+  build = header.children(".build");
+  run = header.children(".run");
+  stop = header.children(".stop");
+  dots = header.find(".dots");
+
+  function reset() {
+    if (interval !== null) {
+      clearInterval(interval);
+      dots.text("...");
+      interval = null;
+    }
+
+    header
+      .removeClass("building")
+      .removeClass("ready")
+      .removeClass("running");
+  }
+
+  onStop = null;
+
+  function building() {
+    reset();
+    header.addClass("building");
+
+    dots.text("");
+    interval = setInterval(function () {
+      var text = dots.text();
+
+      dots.text(text === "..." ? "" : text + ".");
+    }, 200);
+  }
+
+  build.click(function () {
+    building();
+    onBuild();
+  });
+
+  run.click(function () {
+    output.clear();
+    header.addClass("running");
+    onStop = onRun();
+  });
+
+  stop.click(function () {
+    var stopper = onStop;
+    onStop = null;
+
+    header.removeClass("running");
+
+    if (typeof stopper === "function") {
+      stopper();
+    }
+  });
+
+  return {
+    "waiting": reset,
+
+    "error": reset,
+
+    "building": building,
+
+    "running": function () {
+      header.addClass("running");
+    },
+
+    "ready": function () {
+      reset();
+      header.addClass("ready");
+    },
+
+    "stop": function () {
+      stop.click();
+    }
+  };
+};
+
+},{}],11:[function(require,module,exports){
+// The logging and runtime error reporting system.
+
+"use strict";
+
+var $ = require("jquery");
+
+exports.setup = function (output) {
+  function scroll() {
+    output.scrollTop(0).scrollTop(output.children().last().position().top);
+  }
+
+  function newChunk(text) {
+    return $("<p>").text(text);
+  }
+
+  function newError(text) {
+    return $("<p>").addClass("error").html($("<div>").text(text));
+  }
+
+  function newTrace() {
+    return $("<ol>").addClass("trace");
+  }
+
+  function newTraceLine(text) {
+    return $("<li>").text(text);
+  }
+
+  return {
+    "write": function (content) {
+      output.append(newChunk(content));
+      scroll();
+    },
+
+    "clear": function () {
+      output.children().remove();
+    },
+
+    "error": function (error) {
+      var location;
+
+      if (typeof error === "string") {
+        output.append(newError(error));
+        return;
+      }
+
+      if (error.stack !== undefined) {
+        location = error.stack;
+      } else {
+        location = '    in "' + error.module + '"';
+
+        if (error.line !== null) {
+          location += " (line " + error.line + ", column " + error.column + ")";
+        }
+      }
+
+      output.append(newError(error.message)
+        .append(newTrace().append(newTraceLine(location))));
+    }
+  };
+};
+
+},{"jquery":6}],12:[function(require,module,exports){
+(function (global){
 "use strict"
 
-var $, ace,setupViews;
+var $, ace, compiler, fdbk, path, setupViews;
 
 ace = require("brace");
 $ = require("jquery");
+path = require("path");
 
 require("brace/ext/searchbox");
 require("./ace/mode-grace");
+
+compiler = require("./compiler");
+fdbk = require("./feedback");
 
 HttpClient = function () {
   this.get = function (aUrl, aCallback) {
@@ -29115,9 +29777,14 @@ HttpClient = function () {
 }
 
 $(function () {
-  var back, diffView, filestates, forward, view;
+  var back, diffView, feedbacks, fileElement, fileName,
+      filestates, forward, i, texts, view;
 
   view = $("#grace-view");
+
+  fileName = $("#file-name")
+
+  fileElement = null;
 
   /*
     editorCurrent = ace.edit(view.find(".editor-current")[0]);
@@ -29138,7 +29805,7 @@ $(function () {
                 value: "No State Selected",
                 orig: "No State Selected",
                 lineNumbers: true,
-                mode: "javascript",
+                theme: "eclipse",
                 highlightDifferences: true
             });
 
@@ -29170,10 +29837,22 @@ $(function () {
   });
   */
 
+  function getLeftText() {
+    return $(fileElement).data("content");
+  }
+
+  function getRightText(ctxt) {
+    return $("[data-previous='" + $(fileElement).data("id") + "']").data("content");
+  }
+
   $(".file-name").click(function () {
+    var i;
+
+    fileElement = this;
+
     var editor = document.getElementById("editor-diff");
-    var currentText = $(this).data("content");
-    var nextText = $("[data-previous='" + $(this).data("id") + "']").data("content");
+    var currentText = getLeftText();
+    var nextText = getRightText();
     var highlight = true;
 
     if(nextText === undefined){
@@ -29194,6 +29873,11 @@ $(function () {
     diffView.readOnly = true;
     $(".file-name").removeClass( "selected" );
     $(this).addClass("selected");
+
+    for (i = 0; i < 2; i += 1) {
+      feedbacks[i].compilation.waiting();
+      feedbacks[i].output.clear();
+    }
   });
 
   /*
@@ -29204,5 +29888,83 @@ $(function () {
   });
   */
 
+  feedbacks = [];
+  texts = [getLeftText, getRightText];
+
+  for (i = 0; i < 2; i += 1) {
+    (function (i) {
+      var feedback;
+
+      function stop() {
+        feedback.compilation.stop();
+      }
+
+      feedback = fdbk.setup($("#feedback" + i), function () {
+        var modname, name;
+
+        if (fileElement === null || texts[i]() === undefined) {
+          feedback.compilation.waiting();
+          alert("Cannot build when no state selected.");
+          return;
+        }
+
+        name = fileName.text();
+        modname = path.basename(name, ".grace");
+
+        compiler.compile(modname, texts[i](), function (reason) {
+          if (reason !== null) {
+            feedback.error(reason);
+
+            // if (reason.module === name && reason.line) {
+            //   session.setAnnotations([ {
+            //     "row": reason.line - 1,
+            //     "column": reason.column && reason.column - 1,
+            //     "type": "error",
+            //     "text": reason.message
+            //   } ]);
+            // }
+          } else {
+            feedback.compilation.ready();
+          }
+        });
+      }, function () {
+        var escaped, modname;
+
+        feedback.running();
+
+        modname = path.basename(fileName.text(), ".grace");
+        escaped = "gracecode_" + modname.replace("/", "$");
+
+        global.gracecode_main = global[escaped];
+        global.theModule = global[escaped];
+
+        minigrace.lastSourceCode = texts[i]();
+        minigrace.lastModname = modname;
+        minigrace.lastMode = "js";
+        minigrace.lastDebugMode = true;
+
+        minigrace.stdout_write = function (value) {
+          feedback.output.write(value);
+        };
+
+        minigrace.stderr_write = function (value) {
+          feedback.output.error(value);
+          stop();
+        };
+
+        try {
+          minigrace.run();
+        } catch (error) {
+          feedback.output.error(error.toString());
+        } finally {
+          stop();
+        }
+      });
+
+      feedbacks.push(feedback);
+    }(i));
+  }
+
 });
-},{"./ace/mode-grace":5,"brace":2,"brace/ext/searchbox":1,"jquery":4}]},{},[6]);
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./ace/mode-grace":7,"./compiler":8,"./feedback":9,"brace":2,"brace/ext/searchbox":1,"jquery":6,"path":4}]},{},[12]);

@@ -140,7 +140,7 @@ exports.setup = function (files, view, fdbk) {
     if (files.isChanged(name, value)) {
       compiler.forget(name);
       stop();
-      feedback.compilation.waiting();
+      feedback.compilation.waiting();session.getValue()
     }
 
     setDownload(name, value);

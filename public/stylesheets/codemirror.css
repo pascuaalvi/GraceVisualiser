@@ -323,3 +323,8 @@ div.CodeMirror-cursors {
 
 /* Help users use markselection to safely style text background */
 span.CodeMirror-selectedtext { background: none; }
+
+.CodeMirror-merge {
+  position: absolute !important;
+  width: 100%;
+}

@@ -44609,6 +44609,7 @@ function compile(name, source, callback) {
         global["eval"]("var myframe;" + output +
                        ";window." + escaped + "=" + escaped);
       } catch (error) {
+        console.log(error);
         callback({
           "line": 1,
           "column": 1,
@@ -44874,7 +44875,7 @@ exports.setup = function (files, view, fdbk) {
     if (files.isChanged(name, value)) {
       compiler.forget(name);
       stop();
-      feedback.compilation.waiting();
+      feedback.compilation.waiting();session.getValue()
     }
 
     setDownload(name, value);
