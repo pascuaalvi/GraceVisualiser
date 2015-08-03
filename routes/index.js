@@ -101,7 +101,7 @@ router.get('/code', function (req, res) {
       //addClickEvent(db, "visualize button");
       res.render('viz', {
         fileToViz: fileName,
-        title: 'Graceful Visualizer',
+        title: 'Graceful Code History',
         files: fileArray
       });
     });		 
