@@ -29805,7 +29805,7 @@ $(function () {
                 value: "No State Selected",
                 orig: "No State Selected",
                 lineNumbers: true,
-                theme: "eclipse",
+                mode: "clike",
                 highlightDifferences: true
             });
 
@@ -29865,7 +29865,7 @@ $(function () {
         origLeft: currentText,
         value: nextText,
         lineNumbers: true,
-        mode: "javascript",
+        mode: "text/x-grace",
         highlightDifferences: highlight
     });
 
