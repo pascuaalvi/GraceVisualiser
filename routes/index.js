@@ -104,6 +104,7 @@ router.get('/code', function (req, res) {
         title: 'Graceful Code History',
         files: fileArray
       });
+      res.end();
     });		 
 	});
 });
@@ -164,6 +165,7 @@ router.post('/service/file/save',
           else {
             res.send("You haven't made any changes!");
           }
+          res.end();
         }
 
         function write() {      
