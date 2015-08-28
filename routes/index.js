@@ -162,9 +162,6 @@ router.post('/service/file/save',
             res.send("File Saved");
             //res.send("ID: "+guid+" TIME: "+created+" NAME: " + filename + " CONTENT: "+filecontent);
           }
-          else {
-            res.send("You haven't made any changes!");
-          }
           res.end();
         }
 
@@ -195,6 +192,7 @@ router.post('/service/file/save',
               if(filecontent === row.filecontent){
                 isNewState = false;
                 console.log("File content is the same as before!");
+                res.send("You haven't made any changes!");
               } 
             }, write);
           });
